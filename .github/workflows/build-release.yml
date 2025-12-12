@@ -67,10 +67,12 @@ jobs:
 
       - name: Build with Maven
         shell: bash
+        working-directory: WorldPainter
         run: mvn install -Dci -DskipTests -B
 
       - name: Copy Dependencies
         shell: bash
+        working-directory: WorldPainter
         run: mvn dependency:copy-dependencies -DoutputDirectory=target/libs -pl WPGUI -Dci
 
       - name: Prepare jpackage input
