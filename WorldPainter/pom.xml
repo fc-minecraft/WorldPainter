@@ -133,7 +133,7 @@
         <junit.version>4.13.2</junit.version>
 
         <!-- Build dependencies -->
-        <lombok.version>1.18.22</lombok.version>
+        <lombok.version>1.18.30</lombok.version>
 
         <!-- Maven plugin versions -->
         <maven-enforcer-plugin.version>3.3.0</maven-enforcer-plugin.version>
