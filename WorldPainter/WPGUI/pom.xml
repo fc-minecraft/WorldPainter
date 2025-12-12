@@ -151,6 +151,11 @@
                     <artifactId>jide-oss</artifactId>
                     <version>${jide.oss.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>org.pepsoft.worldpainter</groupId>
+                    <artifactId>WPJideStubs</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
             </dependencies>
         </profile>
     </profiles>

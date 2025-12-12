@@ -169,6 +169,9 @@ jobs:
         with:
           tag_name: ${{ needs.setup.outputs.tag_name }}
           name: ${{ needs.setup.outputs.title }}
+          body: |
+            Build commit: ${{ github.sha }}
+            Branch: ${{ github.ref_name }}
           prerelease: ${{ needs.setup.outputs.prerelease }}
           files: |
             WorldPainter-ubuntu-latest/WorldPainter-Linux.tar.gz
