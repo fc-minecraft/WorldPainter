@@ -65,6 +65,14 @@ jobs:
           mkdir -p ~/.m2
           echo '<?xml version="1.0" encoding="UTF8"?><toolchains><toolchain><type>jdk</type><provides><version>17</version></provides><configuration><jdkHome>${{ env.JAVA_HOME }}</jdkHome></configuration></toolchain></toolchains>' > ~/.m2/toolchains.xml
 
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Build with Maven
         shell: bash
         working-directory: WorldPainter

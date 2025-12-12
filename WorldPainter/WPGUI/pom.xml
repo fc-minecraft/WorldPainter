@@ -149,7 +149,7 @@
                 <dependency>
                     <groupId>com.jidesoft</groupId>
                     <artifactId>jide-oss</artifactId>
-                    <version>${jide.version}</version>
+                    <version>${jide.oss.version}</version>
                 </dependency>
             </dependencies>
         </profile>
