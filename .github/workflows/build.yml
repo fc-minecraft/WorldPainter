@@ -1,16 +1,18 @@
 name: Build and Release
 
+permissions:
+  contents: write
+
 on:
   push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
+    branches: ['**'] # Запускать на любой пуш в любую ветку
+    tags: ['v*']
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -26,36 +28,70 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-
-      - name: Grant execute permission for gradlew
-        if: runner.os != 'Windows'
-        run: chmod +x gradlew
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
       - name: Build with Gradle
-        run: ./gradlew build installDist
+        # Собираем Jar файлы
+        run: ./gradlew :WorldPainter:WPGUI:installDist --parallel --build-cache
         if: runner.os != 'Windows'
 
       - name: Build with Gradle (Windows)
         if: runner.os == 'Windows'
-        run: .\gradlew.bat build installDist
+        run: .\gradlew.bat :WorldPainter:WPGUI:installDist --parallel --build-cache
 
-      - name: Package Windows Portable
-        if: runner.os == 'Windows'
+      # Подготовка файлов для jpackage (собираем все в кучу)
+      - name: Prepare jpackage input
+        shell: bash
         run: |
-          cd WorldPainter/WPGUI/build/install
-          7z a ../../../../WorldPainter-Windows-Portable.zip WorldPainter
+          mkdir -p dist/libs
+          cp WorldPainter/WPGUI/build/install/WorldPainter/lib/*.jar dist/libs/
+          find WorldPainter/WPGUI/build/libs -name "WPGUI-*.jar" -exec cp {} dist/main.jar \;
+          rm dist/libs/WPGUI-*.jar || true
 
-      - name: Package Linux
+      - name: Package Windows (jpackage)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          jpackage ^
+            --type app-image ^
+            --dest output ^
+            --input dist/libs ^
+            --name WorldPainter ^
+            --main-jar ..\main.jar ^
+            --main-class org.pepsoft.worldpainter.Main ^
+            --java-options "-Djava.library.path=libs" ^
+            --add-modules ALL-MODULE-PATH
+
+          powershell Compress-Archive -Path output\WorldPainter -DestinationPath WorldPainter-Windows-Portable.zip
+
+      - name: Package Linux (jpackage)
         if: runner.os == 'Linux'
         run: |
-          cd WorldPainter/WPGUI/build/install
-          tar -czvf ../../../../WorldPainter-Linux.tar.gz WorldPainter
+          jpackage \
+            --type app-image \
+            --dest output \
+            --input dist/libs \
+            --name WorldPainter \
+            --main-jar ../main.jar \
+            --main-class org.pepsoft.worldpainter.Main \
+            --java-options "-Djava.library.path=libs" \
+            --add-modules ALL-MODULE-PATH
+          
+          tar -czf WorldPainter-Linux.tar.gz -C output WorldPainter
 
-      - name: Package macOS
+      - name: Package macOS (jpackage)
         if: runner.os == 'macOS'
         run: |
-          cd WorldPainter/WPGUI/build/install
-          zip -r ../../../../WorldPainter-macOS.zip WorldPainter
+          jpackage \
+            --type dmg \
+            --dest output \
+            --input dist/libs \
+            --name WorldPainter \
+            --main-jar ../main.jar \
+            --main-class org.pepsoft.worldpainter.Main \
+            --java-options "-Djava.library.path=libs" \
+            --add-modules ALL-MODULE-PATH
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -64,27 +100,48 @@ jobs:
           path: |
             WorldPainter-Windows-Portable.zip
             WorldPainter-Linux.tar.gz
-            WorldPainter-macOS.zip
+            output/*.dmg
 
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # ЗАПУСКАТЬ ВСЕГДА, ЕСЛИ СБОРКА ПРОШЛА УСПЕШНО
+    if: needs.build.result == 'success'
     steps:
+      - uses: actions/checkout@v4 # Нужен checkout чтобы получить хеш и ветку
+
       - uses: actions/download-artifact@v4
         with:
           pattern: WorldPainter-*
           merge-multiple: true
 
+      # ГЕНЕРАЦИЯ УНИКАЛЬНОГО ИМЕНИ ТЕГА
+      - name: Generate Tag Name
+        id: tag_vars
+        run: |
+          # Берем первые 7 символов хеша коммита
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          # Берем имя ветки и меняем слэши (/) на дефисы (-), чтобы не ломать путь
+          SAFE_BRANCH=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          
+          # Формат: build-ветка-хеш (например: build-main-a1b2c3d)
+          echo "tag_name=build-${SAFE_BRANCH}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "release_name=Build ${SAFE_BRANCH} (${SHORT_SHA})" >> $GITHUB_OUTPUT
+
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.tag_vars.outputs.tag_name }}
+          name: ${{ steps.tag_vars.outputs.release_name }}
+          body: |
+            Automatic build from branch: **${{ github.ref_name }}**
+            Commit: ${{ github.sha }}
+          draft: false
+          # Ставим prerelease=true, чтобы не засорять "Latest Release" каждой сборкой
+          prerelease: true 
           files: |
             WorldPainter-Windows-Portable.zip
             WorldPainter-Linux.tar.gz
-            WorldPainter-macOS.zip
-          draft: true
-          prerelease: false
-          generate_release_notes: true
+            *.dmg
