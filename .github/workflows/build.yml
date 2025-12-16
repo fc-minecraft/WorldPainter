@@ -37,7 +37,7 @@ jobs:
 
       - name: Build with Gradle (Windows)
         if: runner.os == 'Windows'
-        run: ./gradlew build installDist
+        run: .\gradlew.bat build installDist
 
       - name: Package Windows Portable
         if: runner.os == 'Windows'
