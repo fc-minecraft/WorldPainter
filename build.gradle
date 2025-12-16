@@ -62,6 +62,24 @@ project(':WorldPainter:WPCore') {
         testImplementation 'junit:junit:4.13.2'
         testImplementation 'org.slf4j:slf4j-simple:1.7.36'
     }
+
+    test {
+        forkEvery = 1
+    }
+
+    processResources {
+        filesMatching('**/*.properties') {
+            expand(
+                'project': [version: project.version],
+                'timestamp': new Date().format('yyyyMMddHHmmss')
+            )
+        }
+        filesMatching('**/*.plugins') {
+            expand(
+                'project': [version: project.version]
+            )
+        }
+    }
 }
 
 project(':WorldPainter:WPDynmapPreviewer') {
@@ -111,6 +129,15 @@ project(':WorldPainter:WPGUI') {
         implementation name: 'laf-dark'
         implementation name: 'vecmath'
 
+        // Nashorn needed for scripting tests in WPGUI
+        implementation name: 'nashorn-core'
+        implementation name: 'asm' // Nashorn dependency
+        implementation name: 'asm-util' // Nashorn dependency
+        implementation name: 'asm-tree' // Nashorn dependency
+        implementation name: 'asm-commons' // Nashorn dependency
+        implementation name: 'asm-analysis' // Nashorn dependency
+
+
         implementation 'org.slf4j:slf4j-api:1.7.36'
         implementation 'ch.qos.logback:logback-classic:1.2.11'
         implementation 'org.slf4j:jcl-over-slf4j:1.7.36'
@@ -123,6 +150,13 @@ project(':WorldPainter:WPGUI') {
         compileOnly 'org.jetbrains:annotations:24.0.1'
 
         testImplementation 'junit:junit:4.13.2'
+    }
+
+    // Configure tests to fork every time to avoid singleton initialization issues
+    test {
+        forkEvery = 1
+        // Also need to set working directory to root project dir for tests that look for files
+        // script tests look for generated files in ".", which might be the project dir
     }
 
     startScripts {
@@ -144,5 +178,13 @@ project(':WorldPainter:WPGUI') {
 
     distTar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    processResources {
+        filesMatching('**/*.plugins') {
+            expand(
+                'project': [version: project.version]
+            )
+        }
     }
 }
