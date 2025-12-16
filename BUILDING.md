@@ -1,22 +1,52 @@
 # Building WorldPainter
-## Installing dependencies
-WorldPainter needs some dependencies that are not in public Maven repos and cannot be distributed on WorldPainter's private repo due to their licence. You need to install these dependencies into your local Maven repo manually:
-### JIDE Docking Framework
-For the docks, WorldPainter uses the [JIDE Docking Framework](https://www.jidesoft.com/products/dock.htm), which is a commercial product. For development, you can download an evaluation version of the product [here](https://www.jidesoft.com/evaluation/), with user ID and password documented [here](https://www.jidesoft.com/forum/viewtopic.php?t=10) (note that you need to create a forum account to access the second link). The evaluation version will expire after two months, but you can keep downloading it again whenever it expires for two more months of development time.
 
-Once you have your copy, install the `jide-common.jar`, `jide-dock.jar` and `jide-plaf-jdk7.jar` files in your local Maven repository. If necessary, update the version numbers in the pom.xml of the WPGUI module if you downloaded a different version!
+This repository contains the source code for WorldPainter. The build system has been migrated to Gradle to support cross-platform builds and easier dependency management, especially with offline libraries.
 
-## Set up Maven toolchain
-WorldPainter uses the [Maven toolchain framework](https://maven.apache.org/guides/mini/guide-using-toolchains.html) to find the JDK it needs. You need to follow the instructions on that page to configure a toolchain of type jdk and version 17 pointing to a Java 17 JDK. Note that it has not been tested whether WorldPainter will run correctly on older Java versions if you substitute a newer JDK for version 17, although in theory that should work.
+## Prerequisites
 
-## Build WorldPainter
-Once all dependencies are installed and the toolchains set up you can build WorldPainter from the command line or using your favourite IDE by invoking the `install` goal on the `WorldPainter` module. There are some rudimentary tests, but they take a while to run and don't contribute much, so I recommend skipping them by adding `-DskipTests=true`.
+*   **Java 17 JDK**: The build is configured to use Java 17 toolchains. Gradle will attempt to download it if not present, but having it installed is recommended.
+*   **Gradle**: The repository includes a Gradle Wrapper (`gradlew`), so you do not need to install Gradle manually.
 
-## Run WorldPainter
-Once it is built, you can run WorldPainter by invoking the `exec:exec` goal on the `WPGUI` module, or by running the main class: `org.pepsoft.worldpainter.Main`.
+## Structure
 
-## Develop WorldPainter
-For a few pointers, pitfalls and gotchas about developing WorldPainter, see [this page](https://www.worldpainter.net/trac/wiki/DevelopingWorldPainter).
+*   `WorldPainter/`: Contains the source code modules.
+    *   `WPCore`: Core logic.
+    *   `WPDynmapPreviewer`: Dynmap integration.
+    *   `WPGUI`: The main GUI application.
+*   `lib/`: Contains offline dependencies (Jars) that are not easily available in public Maven repositories or are patched versions.
 
-## More details
-For a more detailed description of the build process, see: https://www.worldpainter.net/doc/building.
+## Building Locally
+
+To build the application and create a distribution:
+
+1.  Open a terminal in the repository root.
+2.  Run the following command:
+
+    *   **Linux/macOS:**
+        ```bash
+        ./gradlew installDist
+        ```
+    *   **Windows:**
+        ```cmd
+        gradlew installDist
+        ```
+
+3.  The build output will be in `WorldPainter/WPGUI/build/install/WorldPainter`.
+    *   You can run the application using the script in `bin/WorldPainter` (Linux/macOS) or `bin/WorldPainter.bat` (Windows).
+
+## GitHub Actions CI/CD
+
+The `.github/workflows/build.yml` file configures the Continuous Integration and Delivery pipeline.
+
+*   **Triggers:** Pushes to any branch and Tags starting with `v*`.
+*   **Platforms:** Builds are run on Ubuntu, Windows, and macOS runners.
+*   **Artifacts:**
+    *   `WorldPainter-Windows-Portable.zip`: A portable ZIP for Windows containing the application and libraries.
+    *   `WorldPainter-Linux.tar.gz`: A tarball for Linux.
+    *   `WorldPainter-macOS.zip`: A ZIP for macOS.
+*   **Releases:** When a tag starting with `v` (e.g., `v2.26.1`) is pushed, a GitHub Release is automatically created, and the artifacts are uploaded.
+
+## Troubleshooting
+
+*   **Missing Dependencies:** If you encounter missing classes, ensure the relevant JAR file exists in the `lib/` directory and is listed in the `dependencies` block of the corresponding project in `build.gradle`.
+*   **Toolchain Errors:** If Gradle complains about Java versions, ensure you have internet access so it can download the JDK, or configure a local Java 17 installation.
