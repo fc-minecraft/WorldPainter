@@ -5,8 +5,7 @@ permissions:
 
 on:
   push:
-    branches: ['**'] # Запускать на любой пуш в любую ветку
-    tags: ['v*']
+    branches: ['**']
   workflow_dispatch:
 
 jobs:
@@ -14,6 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
+      fail-fast: false # Если Windows упадет, Mac продолжит собираться
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
@@ -29,10 +29,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
+      # 1. Сборка (Jar файлы)
       - name: Build with Gradle
-        # Собираем Jar файлы
         run: ./gradlew :WorldPainter:WPGUI:installDist --parallel --build-cache
         if: runner.os != 'Windows'
 
@@ -40,57 +40,71 @@ jobs:
         if: runner.os == 'Windows'
         run: .\gradlew.bat :WorldPainter:WPGUI:installDist --parallel --build-cache
 
-      # Подготовка файлов для jpackage (собираем все в кучу)
-      - name: Prepare jpackage input
+      # 2. Подготовка файлов (ВСЕ В ОДНУ ПАПКУ)
+      # Это критически важно, чтобы jpackage не терял зависимости
+      - name: Prepare Staging Area
         shell: bash
         run: |
-          mkdir -p dist/libs
-          cp WorldPainter/WPGUI/build/install/WorldPainter/lib/*.jar dist/libs/
-          find WorldPainter/WPGUI/build/libs -name "WPGUI-*.jar" -exec cp {} dist/main.jar \;
-          rm dist/libs/WPGUI-*.jar || true
+          mkdir -p staging
+          # Копируем библиотеки
+          cp WorldPainter/WPGUI/build/install/WorldPainter/lib/*.jar staging/
+          # Находим имя главного JAR файла
+          MAIN_JAR_PATH=$(find WorldPainter/WPGUI/build/libs -name "WPGUI-*.jar" | grep -v "plain" | head -n 1)
+          MAIN_JAR_NAME=$(basename "$MAIN_JAR_PATH")
+          echo "MAIN_JAR=$MAIN_JAR_NAME" >> $GITHUB_ENV
+          
+          # Копируем главный JAR тоже в staging
+          cp "$MAIN_JAR_PATH" staging/
+          
+          echo "Staging content:"
+          ls -l staging
 
-      - name: Package Windows (jpackage)
+      # 3. Сборка Windows (С КОНСОЛЬЮ)
+      - name: Package Windows
         if: runner.os == 'Windows'
         shell: cmd
         run: |
           jpackage ^
             --type app-image ^
             --dest output ^
-            --input dist/libs ^
+            --input staging ^
             --name WorldPainter ^
-            --main-jar ..\main.jar ^
+            --main-jar ${{ env.MAIN_JAR }} ^
             --main-class org.pepsoft.worldpainter.Main ^
-            --java-options "-Djava.library.path=libs" ^
+            --win-console ^
+            --java-options "-Djava.library.path=." ^
             --add-modules ALL-MODULE-PATH
 
-          powershell Compress-Archive -Path output\WorldPainter -DestinationPath WorldPainter-Windows-Portable.zip
+          powershell Compress-Archive -Path output\WorldPainter -DestinationPath WorldPainter-Windows.zip
 
-      - name: Package Linux (jpackage)
+      # 4. Сборка Linux
+      - name: Package Linux
         if: runner.os == 'Linux'
         run: |
           jpackage \
             --type app-image \
             --dest output \
-            --input dist/libs \
+            --input staging \
             --name WorldPainter \
-            --main-jar ../main.jar \
+            --main-jar ${{ env.MAIN_JAR }} \
             --main-class org.pepsoft.worldpainter.Main \
-            --java-options "-Djava.library.path=libs" \
+            --java-options "-Djava.library.path=." \
             --add-modules ALL-MODULE-PATH
           
           tar -czf WorldPainter-Linux.tar.gz -C output WorldPainter
 
-      - name: Package macOS (jpackage)
+      # 5. Сборка macOS
+      - name: Package macOS
         if: runner.os == 'macOS'
         run: |
           jpackage \
             --type dmg \
             --dest output \
-            --input dist/libs \
+            --input staging \
             --name WorldPainter \
-            --main-jar ../main.jar \
+            --main-jar ${{ env.MAIN_JAR }} \
             --main-class org.pepsoft.worldpainter.Main \
-            --java-options "-Djava.library.path=libs" \
+            --java-options "-Djava.library.path=." \
             --add-modules ALL-MODULE-PATH
 
       - name: Upload Artifacts
@@ -98,7 +112,7 @@ jobs:
         with:
           name: WorldPainter-${{ matrix.os }}
           path: |
-            WorldPainter-Windows-Portable.zip
+            WorldPainter-Windows.zip
             WorldPainter-Linux.tar.gz
             output/*.dmg
 
@@ -107,41 +121,29 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    # ЗАПУСКАТЬ ВСЕГДА, ЕСЛИ СБОРКА ПРОШЛА УСПЕШНО
     if: needs.build.result == 'success'
     steps:
-      - uses: actions/checkout@v4 # Нужен checkout чтобы получить хеш и ветку
+      - uses: actions/checkout@v4
 
       - uses: actions/download-artifact@v4
         with:
           pattern: WorldPainter-*
           merge-multiple: true
 
-      # ГЕНЕРАЦИЯ УНИКАЛЬНОГО ИМЕНИ ТЕГА
-      - name: Generate Tag Name
-        id: tag_vars
+      - name: Generate Tag Info
+        id: tag_info
         run: |
-          # Берем первые 7 символов хеша коммита
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          # Берем имя ветки и меняем слэши (/) на дефисы (-), чтобы не ломать путь
           SAFE_BRANCH=$(echo "${{ github.ref_name }}" | tr '/' '-')
-          
-          # Формат: build-ветка-хеш (например: build-main-a1b2c3d)
           echo "tag_name=build-${SAFE_BRANCH}-${SHORT_SHA}" >> $GITHUB_OUTPUT
-          echo "release_name=Build ${SAFE_BRANCH} (${SHORT_SHA})" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag_vars.outputs.tag_name }}
-          name: ${{ steps.tag_vars.outputs.release_name }}
-          body: |
-            Automatic build from branch: **${{ github.ref_name }}**
-            Commit: ${{ github.sha }}
-          draft: false
-          # Ставим prerelease=true, чтобы не засорять "Latest Release" каждой сборкой
-          prerelease: true 
+          tag_name: ${{ steps.tag_info.outputs.tag_name }}
+          name: Build ${{ github.ref_name }} (${{ github.sha }})
+          prerelease: true
           files: |
-            WorldPainter-Windows-Portable.zip
+            WorldPainter-Windows.zip
             WorldPainter-Linux.tar.gz
             *.dmg
