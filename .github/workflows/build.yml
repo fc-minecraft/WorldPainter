@@ -64,7 +64,7 @@ jobs:
             echo "ICON_ARG=" >> $GITHUB_ENV
           fi
 
-      # 3. Сборка Windows (С ФИКСАМИ ДОСТУПА)
+      # 3. Сборка Windows (FIXED: Раздельные аргументы Java)
       - name: Package Windows
         if: runner.os == 'Windows'
         shell: cmd
@@ -78,12 +78,18 @@ jobs:
             --main-class org.pepsoft.worldpainter.Main ^
             ${{ env.ICON_ARG }} ^
             --win-console ^
-            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED --add-exports java.desktop/sun.awt=ALL-UNNAMED --add-exports java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED --add-opens java.desktop/javax.swing=ALL-UNNAMED --add-opens java.desktop/sun.awt.shell=ALL-UNNAMED -Djava.library.path=." ^
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED" ^
+            --java-options "--add-exports java.desktop/sun.awt=ALL-UNNAMED" ^
+            --java-options "--add-exports java.base/java.lang=ALL-UNNAMED" ^
+            --java-options "--add-opens java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED" ^
+            --java-options "--add-opens java.desktop/javax.swing=ALL-UNNAMED" ^
+            --java-options "--add-opens java.desktop/sun.awt.shell=ALL-UNNAMED" ^
+            --java-options "-Djava.library.path=." ^
             --add-modules ALL-MODULE-PATH
 
           powershell Compress-Archive -Path output\WorldPainter -DestinationPath WorldPainter-Windows.zip
 
-      # 4. Сборка Linux (С ФИКСАМИ ДОСТУПА)
+      # 4. Сборка Linux (FIXED: Раздельные аргументы Java)
       - name: Package Linux
         if: runner.os == 'Linux'
         run: |
@@ -94,12 +100,16 @@ jobs:
             --name WorldPainter \
             --main-jar ${{ env.MAIN_JAR }} \
             --main-class org.pepsoft.worldpainter.Main \
-            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED --add-exports java.desktop/sun.awt=ALL-UNNAMED --add-exports java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/javax.swing=ALL-UNNAMED -Djava.library.path=." \
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED" \
+            --java-options "--add-exports java.desktop/sun.awt=ALL-UNNAMED" \
+            --java-options "--add-exports java.base/java.lang=ALL-UNNAMED" \
+            --java-options "--add-opens java.desktop/javax.swing=ALL-UNNAMED" \
+            --java-options "-Djava.library.path=." \
             --add-modules ALL-MODULE-PATH
           
           tar -czf WorldPainter-Linux.tar.gz -C output WorldPainter
 
-      # 5. Сборка macOS (С ФИКСАМИ ДОСТУПА)
+      # 5. Сборка macOS (FIXED: Раздельные аргументы Java)
       - name: Package macOS
         if: runner.os == 'macOS'
         run: |
@@ -110,7 +120,12 @@ jobs:
             --name WorldPainter \
             --main-jar ${{ env.MAIN_JAR }} \
             --main-class org.pepsoft.worldpainter.Main \
-            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED --add-exports java.desktop/sun.awt=ALL-UNNAMED --add-exports java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/com.apple.laf=ALL-UNNAMED --add-opens java.desktop/javax.swing=ALL-UNNAMED -Djava.library.path=." \
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED" \
+            --java-options "--add-exports java.desktop/sun.awt=ALL-UNNAMED" \
+            --java-options "--add-exports java.base/java.lang=ALL-UNNAMED" \
+            --java-options "--add-opens java.desktop/com.apple.laf=ALL-UNNAMED" \
+            --java-options "--add-opens java.desktop/javax.swing=ALL-UNNAMED" \
+            --java-options "-Djava.library.path=." \
             --add-modules ALL-MODULE-PATH
           
           mv output/*.dmg WorldPainter-macOS.dmg
@@ -152,6 +167,6 @@ jobs:
           name: Build ${{ github.ref_name }} (${{ github.sha }})
           prerelease: true
           files: |
-            WorldPainter-Windows.zip
-            WorldPainter-Linux.tar.gz
-            WorldPainter-macOS.dmg
+            *.zip
+            *.tar.gz
+            *.dmg
