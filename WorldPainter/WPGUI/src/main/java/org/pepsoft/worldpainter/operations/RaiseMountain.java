@@ -20,7 +20,8 @@ import static org.pepsoft.worldpainter.Constants.MEDIUM_BLOBS;
  */
 public class RaiseMountain extends AbstractBrushOperation {
     public RaiseMountain(WorldPainter view) {
-        super("Raise Mountain", "Raises a mountain out of the ground", view, 100, "operation.raiseMountain", "mountain");
+        super("Raise Mountain", "Raises a mountain out of the ground", 100, "operation.raiseMountain", "mountain");
+        setView(view);
         options = new TerrainShapingOptions<>();
         options.setApplyTheme(true); // This has historically been the default for this operation
         optionsPanel = new TerrainShapingOptionsPanel("Mountain", "<ul><li>Left-click to raise a mountain in the shape of the brush and its base at bedrock<li>Right-click to dig a hole in the shape of the brush and its base at build height</ul>", options);

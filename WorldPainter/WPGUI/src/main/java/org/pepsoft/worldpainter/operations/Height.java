@@ -17,7 +17,8 @@ import javax.swing.*;
  */
 public class Height extends AbstractBrushOperation {
     public Height(WorldPainter view) {
-        super("Height", "Raise or lower the terrain", view, 100, "operation.height");
+        super("Height", "Raise or lower the terrain", 100, "operation.height");
+        setView(view);
     }
 
     @Override

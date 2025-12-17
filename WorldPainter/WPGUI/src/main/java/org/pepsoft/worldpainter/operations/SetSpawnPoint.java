@@ -21,7 +21,8 @@ import static org.pepsoft.worldpainter.Dimension.Role.DETAIL;
  */
 public class SetSpawnPoint extends MouseOrTabletOperation {
     public SetSpawnPoint(WorldPainter view) {
-        super("Spawn", "Change the spawn point", view, "operation.setSpawnPoint", "spawn");
+        super("Spawn", "Change the spawn point", "operation.setSpawnPoint", "spawn");
+        setView(view);
     }
 
     @Override

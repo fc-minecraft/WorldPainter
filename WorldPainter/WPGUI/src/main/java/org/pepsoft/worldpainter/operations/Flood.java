@@ -25,9 +25,9 @@ import static org.pepsoft.worldpainter.Constants.TILE_SIZE;
 public class Flood extends MouseOrTabletOperation {
     public Flood(WorldPainter view, boolean floodWithLava) {
         super(floodWithLava ? "Lava" : "Flood", "Flood an area with " + (floodWithLava ? "lava" : "water"),
-                view,
                 "operation.flood." + (floodWithLava ? "lava" : "water"),
                 floodWithLava ? "flood_with_lava" : "flood");
+        setView(view);
         this.floodWithLava = floodWithLava;
         optionsPanel = floodWithLava
                 ? new StandardOptionsPanel("Flood with Lava", "<ul><li>Left-click on dry land to flood with lava\n" +

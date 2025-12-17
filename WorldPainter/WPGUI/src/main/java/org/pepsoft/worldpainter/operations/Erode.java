@@ -16,7 +16,8 @@ import java.util.Random;
  */
 public class Erode extends AbstractBrushOperation {
     public Erode(WorldPainter view) {
-        super("Erode", "Erode the terrain", view, 100, "operation.erode");
+        super("Erode", "Erode the terrain", 100, "operation.erode");
+        setView(view);
     }
 
     @Override

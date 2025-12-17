@@ -17,7 +17,8 @@ import javax.swing.*;
  */
 public class RaisePyramid extends MouseOrTabletOperation {
     public RaisePyramid(WorldPainter worldPainter) {
-        super("Raise Pyramid", "Raises a square pyramid out of the ground", worldPainter, 100, "operation.raisePyramid", "pyramid");
+        super("Raise Pyramid", "Raises a square pyramid out of the ground", 100, "operation.raisePyramid", "pyramid");
+        setView(worldPainter);
     }
 
     @Override

@@ -963,7 +963,7 @@ public final class App extends JFrame implements BrushControl,
                     case AUTO_BIOMES_DISABLED:
                         if (showOptionDialog(this, "Automatic Biomes were previously enabled for this world but have been disabled.\nPress More Info for more information, including how to reenable it.", "Automatic Biomes Disabled", DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {"More Info", "OK"}, "OK") == 0) {
                             try {
-                                DesktopUtils.open(new URL("https://www.worldpainter.net/doc/legacy/newautomaticbiomes"));
+                                DesktopUtils.open(java.net.URI.create("https://www.worldpainter.net/doc/legacy/newautomaticbiomes").toURL());
                             } catch (MalformedURLException e) {
                                 throw new RuntimeException(e);
                             }
@@ -972,7 +972,7 @@ public final class App extends JFrame implements BrushControl,
                     case AUTO_BIOMES_ENABLED:
                         if (showOptionDialog(this, "Automatic Biomes were previously disabled for this world but have been enabled.\nPress More Info for more information, including how to disable it.", "Automatic Biomes Enabled", DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {"More Info", "OK"}, "OK") == 0) {
                             try {
-                                DesktopUtils.open(new URL("https://www.worldpainter.net/doc/legacy/newautomaticbiomes"));
+                                DesktopUtils.open(java.net.URI.create("https://www.worldpainter.net/doc/legacy/newautomaticbiomes").toURL());
                             } catch (MalformedURLException e) {
                                 throw new RuntimeException(e);
                             }
@@ -1749,7 +1749,7 @@ public final class App extends JFrame implements BrushControl,
             throw new IllegalArgumentException("No help key found in hierarchy");
         }
         try {
-            DesktopUtils.open(new URL(HELP_ROOT_URL + encodeForURL(helpKey.toLowerCase())));
+            DesktopUtils.open(java.net.URI.create(HELP_ROOT_URL + encodeForURL(helpKey.toLowerCase())).toURL());
         } catch (MalformedURLException e) {
             throw new RuntimeException("Malformed help URL: " + HELP_ROOT_URL + encodeForURL(helpKey), e);
         }
@@ -2892,7 +2892,7 @@ public final class App extends JFrame implements BrushControl,
         actionMap.put("intensity100", ACTION_INTENSITY_100_PERCENT);
         actionMap.put(ACTION_ESCAPE.getName(), ACTION_ESCAPE);
 
-        int platformCommandMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        int platformCommandMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         inputMap.put(getKeyStroke(VK_SUBTRACT, 0),                                     ACTION_NAME_DECREASE_RADIUS);
         inputMap.put(getKeyStroke(VK_MINUS,    0),                                     ACTION_NAME_DECREASE_RADIUS);
@@ -3206,7 +3206,7 @@ public final class App extends JFrame implements BrushControl,
         constraints.weightx = 0.0;
         List<Component> terrainComponents = createTerrainDropDown();
         terrainSoloCheckBox = (JCheckBox) terrainComponents.get(1);
-        terrainModeComboBox = (JComboBox<TerrainMode>) terrainComponents.get(2);
+        terrainModeComboBox = (JComboBox<TerrainMode>) (JComboBox<?>) terrainComponents.get(2);
         LayoutUtils.addRowOfComponents(layerPanel, constraints, terrainComponents);
         LayoutUtils.addRowOfComponents(layerPanel, constraints, createLayerButton(FLUIDS_AS_LAYER, (char) 0, false, false));
         for (Layer layer: layers) {
@@ -4405,7 +4405,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('f');
         menuItem.addActionListener(e -> {
             try {
-                DesktopUtils.open(new URL("https://www.worldpainter.net/doc/faq"));
+                DesktopUtils.open(java.net.URI.create("https://www.worldpainter.net/doc/faq").toURL());
             } catch (MalformedURLException ex) {
                 throw new RuntimeException(ex);
             }
@@ -4416,7 +4416,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('t');
         menuItem.addActionListener(e -> {
             try {
-                DesktopUtils.open(new URL("https://www.worldpainter.net/trac/wiki/Troubleshooting"));
+                DesktopUtils.open(java.net.URI.create("https://www.worldpainter.net/trac/wiki/Troubleshooting").toURL());
             } catch (MalformedURLException ex) {
                 throw new RuntimeException(ex);
             }
@@ -4429,7 +4429,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('d');
         menuItem.addActionListener(e -> {
             try {
-                DesktopUtils.open(new URL("https://www.worldpainter.net/donate/paypal"));
+                DesktopUtils.open(java.net.URI.create("https://www.worldpainter.net/donate/paypal").toURL());
             } catch (MalformedURLException ex) {
                 throw new RuntimeException(ex);
             }
@@ -4440,7 +4440,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('m');
         menuItem.addActionListener(e -> {
             try {
-                DesktopUtils.open(new URL("https://www.worldpainter.store/"));
+                DesktopUtils.open(java.net.URI.create("https://www.worldpainter.store/").toURL());
             } catch (MalformedURLException ex) {
                 throw new RuntimeException(ex);
             }
@@ -6527,7 +6527,7 @@ public final class App extends JFrame implements BrushControl,
         @Override
         public void performAction(ActionEvent event) {
             try {
-                DesktopUtils.open(new URL("https://www.worldpainter.net/doc/"));
+                DesktopUtils.open(java.net.URI.create("https://www.worldpainter.net/doc/").toURL());
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }

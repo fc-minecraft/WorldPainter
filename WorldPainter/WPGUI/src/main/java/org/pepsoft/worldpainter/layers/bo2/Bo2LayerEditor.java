@@ -955,7 +955,7 @@ public class Bo2LayerEditor extends AbstractLayerEditor<Bo2Layer> implements Lis
 
     private void jLabel6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel6MouseClicked
         try {
-            DesktopUtils.open(new URL("https://www.worldpainter.net/doc/legacy/customobjects"));
+            DesktopUtils.open(java.net.URI.create("https://www.worldpainter.net/doc/legacy/customobjects").toURL());
         } catch (MalformedURLException e) {
             throw new RuntimeException("Malformed URL exception while trying to open https://www.worldpainter.net/doc/legacy/customobjects", e);
         }
