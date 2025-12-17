@@ -112,7 +112,6 @@ project(':WorldPainter:WPGUI') {
     application {
         mainClass = 'org.pepsoft.worldpainter.Main'
         applicationName = 'WorldPainter'
-        applicationDefaultJvmArgs = ['--add-exports=java.desktop/sun.swing=ALL-UNNAMED']
     }
 
     dependencies {
@@ -164,11 +163,11 @@ project(':WorldPainter:WPGUI') {
         doLast {
              windowsScript.text = windowsScript.text.replaceAll(
                 'set CLASSPATH=.*',
-                "set CLASSPATH=%APP_HOME%\\\\lib\\\\WPDynmapPreviewer-${project.version}.jar;%APP_HOME%\\\\lib\\\\*"
+                'set CLASSPATH=%APP_HOME%\\\\lib\\\\*'
             )
              unixScript.text = unixScript.text.replaceAll(
                 'CLASSPATH=.*',
-                "CLASSPATH=\\$APP_HOME/lib/WPDynmapPreviewer-${project.version}.jar:\\$APP_HOME/lib/*"
+                'CLASSPATH=\\$APP_HOME/lib/*'
             )
         }
     }
