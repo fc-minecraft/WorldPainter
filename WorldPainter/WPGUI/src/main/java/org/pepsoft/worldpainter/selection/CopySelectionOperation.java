@@ -17,7 +17,8 @@ import java.beans.PropertyVetoException;
  */
 public class CopySelectionOperation extends MouseOrTabletOperation {
     public CopySelectionOperation(WorldPainterView view) {
-        super("Copy Selection", "Copy the selection to another location", view, "operation.selection.copy", "copy_selection");
+        super("Copy Selection", "Copy the selection to another location", "operation.selection.copy", "copy_selection");
+        setView(view);
     }
 
     @Override

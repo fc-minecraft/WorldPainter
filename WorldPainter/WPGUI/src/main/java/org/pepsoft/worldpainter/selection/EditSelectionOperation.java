@@ -19,7 +19,8 @@ import java.awt.geom.Path2D;
  */
 public class EditSelectionOperation extends AbstractBrushOperation {
     public EditSelectionOperation(WorldPainterView view, ObservableBoolean selectionState) {
-        super("Edit Selection", "Expand or shrink the selection", view, "operation.selection.edit", "edit_selection");
+        super("Edit Selection", "Expand or shrink the selection", "operation.selection.edit", "edit_selection");
+        setView(view);
         this.selectionState = selectionState;
     }
 

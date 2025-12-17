@@ -21,7 +21,8 @@ import static javax.swing.BoxLayout.X_AXIS;
  */
 public class Flatten extends AbstractBrushOperation {
     public Flatten(WorldPainter view) {
-        super("Flatten", "Flatten an area", view, 100, "operation.flatten");
+        super("Flatten", "Flatten an area", 100, "operation.flatten");
+        setView(view);
     }
 
     @Override

@@ -17,7 +17,8 @@ import java.util.Arrays;
  */
 public class Smooth extends AbstractBrushOperation {
     public Smooth(WorldPainter view) {
-        super("Smooth", "Smooth the terrain out", view, 100, "operation.smooth");
+        super("Smooth", "Smooth the terrain out", 100, "operation.smooth");
+        setView(view);
     }
 
     @Override

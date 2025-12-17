@@ -33,7 +33,8 @@ import java.awt.*;
  */
 public class Pencil extends AbstractPaintOperation {
     public Pencil(WorldPainterView view) {
-        super("Pencil", "Draw dots and straight or freehand lines with any terrain or layer", view, 100, "operation.pencil");
+        super("Pencil", "Draw dots and straight or freehand lines with any terrain or layer", 100, "operation.pencil");
+        setView(view);
     }
 
     @Override
