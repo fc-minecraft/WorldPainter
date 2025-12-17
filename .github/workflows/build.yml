@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
-      fail-fast: false # Если Windows упадет, Mac продолжит собираться
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
@@ -31,7 +31,7 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      # 1. Сборка (Jar файлы)
+      # 1. Сборка JAR файлов
       - name: Build with Gradle
         run: ./gradlew :WorldPainter:WPGUI:installDist --parallel --build-cache
         if: runner.os != 'Windows'
@@ -40,26 +40,31 @@ jobs:
         if: runner.os == 'Windows'
         run: .\gradlew.bat :WorldPainter:WPGUI:installDist --parallel --build-cache
 
-      # 2. Подготовка файлов (ВСЕ В ОДНУ ПАПКУ)
-      # Это критически важно, чтобы jpackage не терял зависимости
+      # 2. Подготовка файлов (Staging)
       - name: Prepare Staging Area
         shell: bash
         run: |
           mkdir -p staging
           # Копируем библиотеки
           cp WorldPainter/WPGUI/build/install/WorldPainter/lib/*.jar staging/
-          # Находим имя главного JAR файла
+          
+          # Находим главный JAR
           MAIN_JAR_PATH=$(find WorldPainter/WPGUI/build/libs -name "WPGUI-*.jar" | grep -v "plain" | head -n 1)
           MAIN_JAR_NAME=$(basename "$MAIN_JAR_PATH")
           echo "MAIN_JAR=$MAIN_JAR_NAME" >> $GITHUB_ENV
-          
-          # Копируем главный JAR тоже в staging
           cp "$MAIN_JAR_PATH" staging/
-          
-          echo "Staging content:"
-          ls -l staging
 
-      # 3. Сборка Windows (С КОНСОЛЬЮ)
+          # --- ПОИСК ИКОНКИ ---
+          ICON_PATH=$(find WorldPainter/WPGUI -name "*.ico" | head -n 1)
+          if [ -n "$ICON_PATH" ]; then
+            echo "Found icon at $ICON_PATH"
+            cp "$ICON_PATH" staging/icon.ico
+            echo "ICON_ARG=--icon staging/icon.ico" >> $GITHUB_ENV
+          else
+            echo "ICON_ARG=" >> $GITHUB_ENV
+          fi
+
+      # 3. Сборка Windows (С ФИКСАМИ ДОСТУПА)
       - name: Package Windows
         if: runner.os == 'Windows'
         shell: cmd
@@ -71,13 +76,14 @@ jobs:
             --name WorldPainter ^
             --main-jar ${{ env.MAIN_JAR }} ^
             --main-class org.pepsoft.worldpainter.Main ^
+            ${{ env.ICON_ARG }} ^
             --win-console ^
-            --java-options "-Djava.library.path=." ^
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED --add-exports java.desktop/sun.awt=ALL-UNNAMED --add-exports java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED --add-opens java.desktop/javax.swing=ALL-UNNAMED --add-opens java.desktop/sun.awt.shell=ALL-UNNAMED -Djava.library.path=." ^
             --add-modules ALL-MODULE-PATH
 
           powershell Compress-Archive -Path output\WorldPainter -DestinationPath WorldPainter-Windows.zip
 
-      # 4. Сборка Linux
+      # 4. Сборка Linux (С ФИКСАМИ ДОСТУПА)
       - name: Package Linux
         if: runner.os == 'Linux'
         run: |
@@ -88,12 +94,12 @@ jobs:
             --name WorldPainter \
             --main-jar ${{ env.MAIN_JAR }} \
             --main-class org.pepsoft.worldpainter.Main \
-            --java-options "-Djava.library.path=." \
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED --add-exports java.desktop/sun.awt=ALL-UNNAMED --add-exports java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/javax.swing=ALL-UNNAMED -Djava.library.path=." \
             --add-modules ALL-MODULE-PATH
           
           tar -czf WorldPainter-Linux.tar.gz -C output WorldPainter
 
-      # 5. Сборка macOS
+      # 5. Сборка macOS (С ФИКСАМИ ДОСТУПА)
       - name: Package macOS
         if: runner.os == 'macOS'
         run: |
@@ -104,8 +110,10 @@ jobs:
             --name WorldPainter \
             --main-jar ${{ env.MAIN_JAR }} \
             --main-class org.pepsoft.worldpainter.Main \
-            --java-options "-Djava.library.path=." \
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED --add-exports java.desktop/sun.awt=ALL-UNNAMED --add-exports java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/com.apple.laf=ALL-UNNAMED --add-opens java.desktop/javax.swing=ALL-UNNAMED -Djava.library.path=." \
             --add-modules ALL-MODULE-PATH
+          
+          mv output/*.dmg WorldPainter-macOS.dmg
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -114,7 +122,7 @@ jobs:
           path: |
             WorldPainter-Windows.zip
             WorldPainter-Linux.tar.gz
-            output/*.dmg
+            WorldPainter-macOS.dmg
 
   release:
     needs: build
@@ -146,4 +154,4 @@ jobs:
           files: |
             WorldPainter-Windows.zip
             WorldPainter-Linux.tar.gz
-            *.dmg
+            WorldPainter-macOS.dmg
