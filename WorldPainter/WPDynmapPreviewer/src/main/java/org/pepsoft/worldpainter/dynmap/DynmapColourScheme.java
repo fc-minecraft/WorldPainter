@@ -55,9 +55,18 @@ public final class DynmapColourScheme implements ColourScheme {
     }
 
     public static DynmapColourScheme loadDynMapColourScheme(String name, int step) {
-        DynmapBlockStateHelper.initialise();
-        final ColorScheme colorScheme = ColorScheme.getScheme(null, name);
-        return new DynmapColourScheme(colorScheme, step);
+        try {
+            DynmapBlockStateHelper.initialise();
+            final ColorScheme colorScheme = ColorScheme.getScheme(null, name);
+            if (colorScheme == null) {
+                logger.warn("Could not load Dynmap colour scheme '{}'", name);
+                return null;
+            }
+            return new DynmapColourScheme(colorScheme, step);
+        } catch (Throwable e) {
+            logger.error("Failed to load Dynmap colour scheme '" + name + "'", e);
+            return null;
+        }
     }
 
     private final ColorScheme dynmapColorScheme;

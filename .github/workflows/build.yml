@@ -1,0 +1,156 @@
+name: Build and Release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: Build with Gradle
+        if: runner.os != 'Windows'
+        run: ./gradlew :WorldPainter:WPGUI:installDist --parallel --build-cache
+
+      - name: Build with Gradle (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat :WorldPainter:WPGUI:installDist --parallel --build-cache
+
+      - name: Prepare Staging Area
+        shell: bash
+        run: |
+          mkdir -p staging
+          cp WorldPainter/WPGUI/build/install/WorldPainter/lib/*.jar staging/
+          MAIN_JAR_PATH=$(find WorldPainter/WPGUI/build/libs -name "WPGUI-*.jar" | grep -v "plain" | head -n 1)
+          cp "$MAIN_JAR_PATH" staging/
+          echo "MAIN_JAR=$(basename "$MAIN_JAR_PATH")" >> $GITHUB_ENV
+          ICON_PATH=$(find WorldPainter/WPGUI -name "*.ico" | head -n 1)
+          if [ -n "$ICON_PATH" ]; then
+            cp "$ICON_PATH" staging/icon.ico
+            echo "ICON_ARG=--icon staging/icon.ico" >> $GITHUB_ENV
+          else
+            echo "ICON_ARG=" >> $GITHUB_ENV
+          fi
+
+      - name: Package Windows
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          jpackage ^
+            --type app-image ^
+            --dest output ^
+            --input staging ^
+            --name WorldPainter ^
+            --main-jar ${{ env.MAIN_JAR }} ^
+            --main-class org.pepsoft.worldpainter.Main ^
+            ${{ env.ICON_ARG }} ^
+            --win-console ^
+            --java-options "--add-exports java.base/sun.security.action=ALL-UNNAMED" ^
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED" ^
+            --java-options "--add-exports java.desktop/sun.awt=ALL-UNNAMED" ^
+            --java-options "--add-exports java.base/java.lang=ALL-UNNAMED" ^
+            --java-options "--add-opens java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED" ^
+            --java-options "--add-opens java.desktop/javax.swing=ALL-UNNAMED" ^
+            --java-options "--add-opens java.desktop/sun.awt.shell=ALL-UNNAMED" ^
+            --java-options "-Djava.library.path=." ^
+            --add-modules ALL-MODULE-PATH
+          powershell Compress-Archive -Path output\WorldPainter -DestinationPath WorldPainter-Windows.zip
+
+      - name: Package Linux
+        if: runner.os == 'Linux'
+        run: |
+          jpackage \
+            --type app-image \
+            --dest output \
+            --input staging \
+            --name WorldPainter \
+            --main-jar ${{ env.MAIN_JAR }} \
+            --main-class org.pepsoft.worldpainter.Main \
+            --java-options "--add-exports java.base/sun.security.action=ALL-UNNAMED" \
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED" \
+            --java-options "--add-exports java.desktop/sun.awt=ALL-UNNAMED" \
+            --java-options "--add-exports java.base/java.lang=ALL-UNNAMED" \
+            --java-options "--add-opens java.desktop/javax.swing=ALL-UNNAMED" \
+            --java-options "-Djava.library.path=." \
+            --add-modules ALL-MODULE-PATH
+          tar -czf WorldPainter-Linux.tar.gz -C output WorldPainter
+
+      - name: Package macOS
+        if: runner.os == 'macOS'
+        run: |
+          jpackage \
+            --type dmg \
+            --dest output \
+            --input staging \
+            --name WorldPainter \
+            --main-jar ${{ env.MAIN_JAR }} \
+            --main-class org.pepsoft.worldpainter.Main \
+            --java-options "--add-exports java.base/sun.security.action=ALL-UNNAMED" \
+            --java-options "--add-exports java.desktop/sun.swing=ALL-UNNAMED" \
+            --java-options "--add-exports java.desktop/sun.awt=ALL-UNNAMED" \
+            --java-options "--add-exports java.base/java.lang=ALL-UNNAMED" \
+            --java-options "--add-opens java.desktop/com.apple.laf=ALL-UNNAMED" \
+            --java-options "--add-opens java.desktop/javax.swing=ALL-UNNAMED" \
+            --java-options "-Djava.library.path=." \
+            --add-modules ALL-MODULE-PATH
+          mv output/*.dmg WorldPainter-macOS.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WorldPainter-${{ matrix.os }}
+          path: |
+            WorldPainter-Windows.zip
+            WorldPainter-Linux.tar.gz
+            WorldPainter-macOS.dmg
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: needs.build.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: WorldPainter-*
+          merge-multiple: true
+
+      - name: Generate Tag Info
+        id: tag_info
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          SAFE_BRANCH=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          echo "tag_name=build-${SAFE_BRANCH}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag_info.outputs.tag_name }}
+          name: Build ${{ github.ref_name }} (${{ github.sha }})
+          prerelease: true
+          files: |
+            *.zip
+            *.tar.gz
+            *.dmg

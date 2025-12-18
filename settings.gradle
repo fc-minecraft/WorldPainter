@@ -1,0 +1,5 @@
+rootProject.name = 'WorldPainter'
+
+include 'WorldPainter:WPCore'
+include 'WorldPainter:WPDynmapPreviewer'
+include 'WorldPainter:WPGUI'

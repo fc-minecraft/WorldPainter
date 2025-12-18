@@ -1,7 +1,7 @@
-.idea
-*.iml
-logs
-exporttimings.csv
-target
-*.code-workspace
-exports
+.gradle/
+build/
+**/build/
+*.class
+*.jar
+!lib/*.jar
+!gradle/wrapper/gradle-wrapper.jar

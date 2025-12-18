@@ -1,0 +1,194 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'jvm-toolchains'
+}
+
+allprojects {
+    group = 'org.pepsoft.worldpainter'
+    version = '2.26.1-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+        flatDir {
+            dirs "${rootDir}/lib"
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+}
+
+project(':WorldPainter:WPCore') {
+    dependencies {
+        implementation name: 'Utils'
+        implementation name: 'JNBT'
+        implementation name: 'SwingUtils'
+        implementation name: 'WPValueObjects'
+        implementation name: 'vecmath'
+
+        // ImageIO dependencies
+        implementation name: 'imageio-tiff'
+        implementation name: 'imageio-core'
+        implementation name: 'imageio-metadata'
+        implementation name: 'common-image'
+        implementation name: 'common-io'
+        implementation name: 'common-lang'
+
+        implementation name: 'nashorn-core'
+        implementation 'org.slf4j:slf4j-api:1.7.36'
+
+        implementation name: 'guava'
+        implementation name: 'jackson-databind'
+        implementation name: 'jackson-core'
+        implementation name: 'jackson-annotations'
+
+        implementation 'com.formdev:flatlaf:3.4'
+
+        compileOnly 'org.jetbrains:annotations:24.0.1'
+
+        compileOnly 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+        testImplementation 'junit:junit:4.13.2'
+        testImplementation 'org.slf4j:slf4j-simple:1.7.36'
+    }
+
+    test {
+        forkEvery = 1
+    }
+
+    processResources {
+        filesMatching('**/*.properties') {
+            expand(
+                'project': [version: project.version],
+                'timestamp': new Date().format('yyyyMMddHHmmss')
+            )
+        }
+        filesMatching('**/*.plugins') {
+            expand(
+                'project': [version: project.version]
+            )
+        }
+    }
+}
+
+project(':WorldPainter:WPDynmapPreviewer') {
+    dependencies {
+        implementation project(':WorldPainter:WPCore')
+
+        // Needed dependencies for WPDynmapPreviewer
+        implementation name: 'DynmapCore'
+        implementation name: 'DynmapCoreAPI'
+
+        // Transitive dependencies that might not be visible from WPCore because of 'implementation'
+        implementation name: 'Utils'
+        implementation name: 'SwingUtils'
+        implementation name: 'guava'
+        implementation name: 'jackson-databind'
+        implementation name: 'vecmath'
+
+        implementation 'org.yaml:snakeyaml:2.0'
+        implementation('com.googlecode.json-simple:json-simple:1.1.1') {
+            exclude group: 'junit', module: 'junit'
+        }
+        implementation 'org.slf4j:slf4j-api:1.7.36'
+        implementation 'org.slf4j:jul-to-slf4j:1.7.36'
+    }
+}
+
+project(':WorldPainter:WPGUI') {
+    apply plugin: 'application'
+
+    application {
+        mainClass = 'org.pepsoft.worldpainter.Main'
+        applicationName = 'WorldPainter'
+    }
+
+    dependencies {
+        implementation project(':WorldPainter:WPCore')
+        implementation project(':WorldPainter:WPDynmapPreviewer')
+
+        implementation name: 'Utils'
+        implementation name: 'SwingUtils'
+        implementation name: 'JNBT'
+        implementation name: 'WPValueObjects'
+        implementation name: 'common-image'
+        implementation name: 'jpen'
+        // JIDE dependencies removed
+        implementation name: 'laf-dark'
+        implementation name: 'vecmath'
+
+        // Nashorn needed for scripting tests in WPGUI
+        implementation name: 'nashorn-core'
+        implementation name: 'asm' // Nashorn dependency
+        implementation name: 'asm-util' // Nashorn dependency
+        implementation name: 'asm-tree' // Nashorn dependency
+        implementation name: 'asm-commons' // Nashorn dependency
+        implementation name: 'asm-analysis' // Nashorn dependency
+
+
+        implementation 'org.slf4j:slf4j-api:1.7.36'
+        implementation 'ch.qos.logback:logback-classic:1.2.11'
+        implementation 'org.slf4j:jcl-over-slf4j:1.7.36'
+        implementation 'org.slf4j:jul-to-slf4j:1.7.36'
+        runtimeOnly 'org.apache.logging.log4j:log4j-to-slf4j:2.17.2'
+
+        implementation name: 'guava'
+        implementation name: 'jackson-databind'
+
+        implementation 'com.formdev:flatlaf:3.4'
+        implementation 'com.formdev:flatlaf-extras:3.4'
+
+        compileOnly 'org.jetbrains:annotations:24.0.1'
+
+        testImplementation 'junit:junit:4.13.2'
+    }
+
+    // Configure tests to fork every time to avoid singleton initialization issues
+    test {
+        forkEvery = 1
+        // Also need to set working directory to root project dir for tests that look for files
+        // script tests look for generated files in ".", which might be the project dir
+    }
+
+    startScripts {
+        doLast {
+             windowsScript.text = windowsScript.text.replaceAll(
+                'set CLASSPATH=.*',
+                'set CLASSPATH=%APP_HOME%\\\\lib\\\\*'
+            )
+             unixScript.text = unixScript.text.replaceAll(
+                'CLASSPATH=.*',
+                'CLASSPATH=\\$APP_HOME/lib/*'
+            )
+        }
+    }
+
+    distZip {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    distTar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    processResources {
+        filesMatching('**/*.plugins') {
+            expand(
+                'project': [version: project.version]
+            )
+        }
+    }
+}

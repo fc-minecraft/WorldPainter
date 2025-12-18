@@ -5,8 +5,7 @@
 
 package org.pepsoft.worldpainter;
 
-import com.jidesoft.docking.*;
-import com.jidesoft.swing.JideLabel;
+import org.pepsoft.worldpainter.docking.*;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 import org.pepsoft.minecraft.Direction;
@@ -82,6 +81,8 @@ import java.beans.PropertyVetoException;
 import java.io.*;
 import java.lang.Void;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
@@ -91,8 +92,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
-import static com.jidesoft.docking.DockContext.DOCK_SIDE_EAST;
-import static com.jidesoft.docking.DockContext.DOCK_SIDE_WEST;
+import static org.pepsoft.worldpainter.docking.DockContext.DOCK_SIDE_EAST;
+import static org.pepsoft.worldpainter.docking.DockContext.DOCK_SIDE_WEST;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.GridBagConstraints.HORIZONTAL;
@@ -1966,9 +1967,9 @@ public final class App extends JFrame implements BrushControl,
     private void loadCustomBrushes() {
         customBrushes = new TreeMap<>();
         if (! Configuration.getInstance().isSafeMode()) {
-            final File brushesDir = new File(Configuration.getConfigDir(), "brushes");
-            if (brushesDir.isDirectory()) {
-                loadCustomBrushes(CUSTOM_BRUSHES_DEFAULT_TITLE, brushesDir);
+            final Path brushesDir = Configuration.getConfigDir().toPath().resolve("brushes");
+            if (Files.isDirectory(brushesDir)) {
+                loadCustomBrushes(CUSTOM_BRUSHES_DEFAULT_TITLE, brushesDir.toFile());
                 final Configuration config = Configuration.getInstance();
                 if ((customBrushes.size() == 1)
                         && customBrushes.containsKey(CUSTOM_BRUSHES_DEFAULT_TITLE)
@@ -3186,15 +3187,13 @@ public final class App extends JFrame implements BrushControl,
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(1, 1, 1, 1);
 
-        JideLabel label = new JideLabel("Show");
-        label.setOrientation(SwingConstants.VERTICAL);
-        label.setClockwise(false);
+        JLabel label = new JLabel("<html>S<br>h<br>o<br>w</html>");
+        label.setVerticalAlignment(SwingConstants.BOTTOM);
         label.setMinimumSize(label.getPreferredSize());
         constraints.anchor = GridBagConstraints.SOUTH;
         layerPanel.add(label, constraints);
-        label = new JideLabel("Solo");
-        label.setOrientation(SwingConstants.VERTICAL);
-        label.setClockwise(false);
+        label = new JLabel("<html>S<br>o<br>l<br>o</html>");
+        label.setVerticalAlignment(SwingConstants.BOTTOM);
         label.setMinimumSize(label.getPreferredSize());
         layerPanel.add(label, constraints);
         constraints.gridwidth = GridBagConstraints.REMAINDER;
@@ -6021,7 +6020,7 @@ public final class App extends JFrame implements BrushControl,
     }
 
     static File getAutosaveFile() {
-        return new File(Configuration.getConfigDir(), "autosave.world");
+        return Configuration.getConfigDir().toPath().resolve("autosave.world").toFile();
     }
 
     public final IntensityAction ACTION_INTENSITY_10_PERCENT  = new IntensityAction(  2, VK_1); // 9 so that it will round to level 1 for nibble sized layers

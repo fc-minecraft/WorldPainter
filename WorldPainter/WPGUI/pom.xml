@@ -48,29 +48,24 @@
             <!--<artifactId>jide-oss</artifactId>-->
             <!--<version>${jide.version}</version>-->
         <!--</dependency>-->
-        <dependency>
-            <!-- Commercial product; you will need to download the evaluation version, or obtain a license to use JIDE
-                 (an open source license is free). -->
+        <!-- Commercial dependencies are moved to profiles -->
+        <!-- dependency>
             <groupId>com.jidesoft</groupId>
             <artifactId>jide-common</artifactId>
             <version>${jide.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Commercial product; you will need to download the evaluation version, or obtain a license to use JIDE
-                 (an open source license is free). -->
+        </dependency -->
+        <!-- dependency>
             <groupId>com.jidesoft</groupId>
             <artifactId>jide-dock</artifactId>
             <version>${jide.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Commercial product; you will need to download the evaluation version, or obtain a license to use JIDE
-                 (an open source license is free). This module is only necessary on Linux, to make the GTK look and feel
-                 work correctly. -->
+        </dependency -->
+        <!-- dependency>
             <groupId>com.jidesoft</groupId>
             <artifactId>jide-plaf-jdk7</artifactId>
             <version>${jide.version}</version>
             <scope>runtime</scope>
-        </dependency>
+        </dependency -->
+
         <dependency>
             <!-- Not in Maven central; here it comes from the worldpainter-private repo. -->
             <groupId>org.netbeans.swing</groupId>
@@ -114,6 +109,56 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>commercial-jide</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!ci</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.jidesoft</groupId>
+                    <artifactId>jide-common</artifactId>
+                    <version>${jide.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.jidesoft</groupId>
+                    <artifactId>jide-dock</artifactId>
+                    <version>${jide.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.jidesoft</groupId>
+                    <artifactId>jide-plaf-jdk7</artifactId>
+                    <version>${jide.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>oss-jide</id>
+            <activation>
+                <property>
+                    <name>ci</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.jidesoft</groupId>
+                    <artifactId>jide-oss</artifactId>
+                    <version>${jide.oss.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.pepsoft.worldpainter</groupId>
+                    <artifactId>WPJideStubs</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
     <build>
         <resources>
