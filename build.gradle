@@ -21,7 +21,7 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 
@@ -53,6 +53,8 @@ project(':WorldPainter:WPCore') {
         implementation name: 'jackson-databind'
         implementation name: 'jackson-core'
         implementation name: 'jackson-annotations'
+
+        implementation 'com.formdev:flatlaf:3.4'
 
         compileOnly 'org.jetbrains:annotations:24.0.1'
 
@@ -124,8 +126,7 @@ project(':WorldPainter:WPGUI') {
         implementation name: 'WPValueObjects'
         implementation name: 'common-image'
         implementation name: 'jpen'
-        implementation name: 'jide-common'
-        implementation name: 'jide-dock'
+        // JIDE dependencies removed
         implementation name: 'laf-dark'
         implementation name: 'vecmath'
 
@@ -146,6 +147,9 @@ project(':WorldPainter:WPGUI') {
 
         implementation name: 'guava'
         implementation name: 'jackson-databind'
+
+        implementation 'com.formdev:flatlaf:3.4'
+        implementation 'com.formdev:flatlaf-extras:3.4'
 
         compileOnly 'org.jetbrains:annotations:24.0.1'
 

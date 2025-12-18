@@ -111,8 +111,10 @@ public class EditPaintDialog extends WorldPainterDialog {
         // Remove the button that is on there just to be able to edit the form at development time
         panelColours.removeAll();
         // Rotate the opacity label (can't do that at development time or it would mess up the layout)
-        labelOpacity.setOrientation(SwingConstants.VERTICAL);
-        labelOpacity.setClockwise(false);
+        // labelOpacity.setOrientation(SwingConstants.VERTICAL);
+        // labelOpacity.setClockwise(false);
+        // Fallback for standard JLabel:
+        labelOpacity.setVerticalAlignment(SwingConstants.BOTTOM);
         for (int ega = 0; ega < 16; ega++) {
             final JToggleButton button = new JToggleButton(createScaledColourIcon(EGA_COLOURS[ega]));
             button.setToolTipText(EGA_NAMES[ega]);
@@ -201,7 +203,11 @@ public class EditPaintDialog extends WorldPainterDialog {
         buttonClear = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         sliderOpacity = new javax.swing.JSlider();
-        labelOpacity = new com.jidesoft.swing.JideLabel();
+        labelOpacity = new javax.swing.JLabel();
+        ((javax.swing.JLabel)labelOpacity).setUI(new javax.swing.plaf.basic.BasicLabelUI() {
+             // Custom UI to simulate JideLabel rotation if needed, or just standard JLabel
+             // JideLabel default is just a label unless configured.
+        });
         radioButtonSolidColour = new javax.swing.JRadioButton();
         radioButtonPattern = new javax.swing.JRadioButton();
         buttonSelectSolidColour = new javax.swing.JButton();
@@ -487,7 +493,7 @@ public class EditPaintDialog extends WorldPainterDialog {
     private org.pepsoft.worldpainter.util.IconEditor iconEditor1;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private com.jidesoft.swing.JideLabel labelOpacity;
+    private javax.swing.JLabel labelOpacity;
     private javax.swing.JPanel panelColours;
     private javax.swing.JRadioButton radioButtonPattern;
     private javax.swing.JRadioButton radioButtonSolidColour;

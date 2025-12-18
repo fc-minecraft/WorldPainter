@@ -1,9 +1,9 @@
 package org.pepsoft.worldpainter.util;
 
-import com.jidesoft.docking.DockContext;
-import com.jidesoft.docking.DockableFrame;
 import org.pepsoft.util.IconUtils;
 import org.pepsoft.worldpainter.App;
+import org.pepsoft.worldpainter.docking.DockContext;
+import org.pepsoft.worldpainter.docking.DockableFrame;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,7 +13,6 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 
-import static com.jidesoft.docking.DockableFrame.*;
 import static java.awt.GridBagConstraints.HORIZONTAL;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
@@ -56,7 +55,8 @@ public class DockableFrameBuilder {
     }
 
     public DockableFrame build() {
-        DockableFrame dockableFrame = new DockableFrame(id);
+        DockableFrame dockableFrame = new DockableFrame(title, null); // Icon set later
+        dockableFrame.setKey(id);
 
         JPanel panel = new VerticalScrollingJPanel(new GridBagLayout());
         if (margin > 0) {
@@ -76,7 +76,12 @@ public class DockableFrameBuilder {
             constraints.weighty = 1.0;
             panel.add(new JPanel(), constraints);
         }
+
+        dockableFrame.setScrollable(scrollable);
         if (scrollable) {
+            // In our custom docking manager, we might let the manager handle scrollpane wrapping
+            // OR wrap it here. DockableFrame in our simple impl is a JPanel.
+            // If we wrap it here:
             final JScrollPane scrollPane = new JScrollPane(panel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setBorder(null);
             dockableFrame.add(scrollPane, BorderLayout.CENTER);
@@ -86,8 +91,6 @@ public class DockableFrameBuilder {
 
         // Use title everywhere
         dockableFrame.setTitle(title);
-        dockableFrame.setSideTitle(title);
-        dockableFrame.setTabTitle(title);
         dockableFrame.setToolTipText(title);
 
         // Try to find an icon to use for the tab
@@ -114,27 +117,11 @@ public class DockableFrameBuilder {
         }
         dockableFrame.setFrameIcon((icon != null) ? icon : ICON_UNKNOWN_PATTERN);
 
-        // Use preferred size of component as much as possible
-        final Dimension preferredSize = component.getPreferredSize();
-        dockableFrame.setAutohideWidth(preferredSize.width);
-        dockableFrame.setDockedWidth(preferredSize.width);
-        dockableFrame.setDockedHeight(preferredSize.height);
-        dockableFrame.setUndockedBounds(new Rectangle(-1, -1, preferredSize.width, preferredSize.height));
+        // Set side and index for initial placement
+        dockableFrame.setSide(side);
+        // Index is not fully supported in simple implementation, but could be added
 
-        // Make hidable, but don't display hide button, so incidental panels can
-        // be hidden on the fly
-        dockableFrame.setHidable(true);
-        dockableFrame.setAvailableButtons(BUTTON_FLOATING | BUTTON_AUTOHIDE | BUTTON_HIDE_AUTOHIDE);
-        dockableFrame.setShowContextMenu(false); // Disable the context menu because it contains the Close option with no way to hide it
-
-        // Initial location of panel
-        dockableFrame.setInitMode(DockContext.STATE_FRAMEDOCKED);
-        dockableFrame.setInitSide(side);
-        dockableFrame.setInitIndex(index);
-
-        // Other flags
-        dockableFrame.setAutohideWhenActive(true);
-        dockableFrame.setMaximizable(false);
+        dockableFrame.setExpanded(expand);
 
         //Help key
         dockableFrame.putClientProperty(App.KEY_HELP_KEY, "Panel/" + id);

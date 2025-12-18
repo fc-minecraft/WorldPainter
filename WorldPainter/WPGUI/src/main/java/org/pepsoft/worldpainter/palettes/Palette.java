@@ -5,9 +5,8 @@
  */
 package org.pepsoft.worldpainter.palettes;
 
-import com.jidesoft.docking.DockContext;
-import com.jidesoft.docking.DockableFrame;
-import com.jidesoft.swing.JideLabel;
+import org.pepsoft.worldpainter.docking.DockContext;
+import org.pepsoft.worldpainter.docking.DockableFrame;
 import org.jetbrains.annotations.NotNull;
 import org.pepsoft.util.IconUtils;
 import org.pepsoft.worldpainter.layers.CustomLayer;
@@ -41,15 +40,18 @@ public class Palette {
         // Row: Show/Solo labels
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(1, 1, 1, 1);
-        JideLabel label = new JideLabel("Show");
-        label.setOrientation(SwingConstants.VERTICAL);
-        label.setClockwise(false);
+        // Simplified JLabel instead of JideLabel for vertical text.
+        // Standard JLabel doesn't support vertical orientation easily without HTML or rotation logic.
+        // For simplicity, using horizontal labels or abbreviated vertical.
+        // Alternatively, use a custom VerticalLabel if needed, but "Show"/"Solo" are short enough to maybe fit horizontally or use HTML.
+        JLabel label = new JLabel("<html>S<br>h<br>o<br>w</html>");
+        // label.setOrientation(SwingConstants.VERTICAL); // Not supported by standard JLabel
+        label.setVerticalAlignment(SwingConstants.BOTTOM);
         label.setMinimumSize(label.getPreferredSize());
         constraints.anchor = GridBagConstraints.SOUTH;
         panel.add(label, constraints);
-        label = new JideLabel("Solo");
-        label.setOrientation(SwingConstants.VERTICAL);
-        label.setClockwise(false);
+        label = new JLabel("<html>S<br>o<br>l<br>o</html>");
+        label.setVerticalAlignment(SwingConstants.BOTTOM);
         label.setMinimumSize(label.getPreferredSize());
         panel.add(label, constraints);
         constraints.gridwidth = GridBagConstraints.REMAINDER;
@@ -90,7 +92,7 @@ public class Palette {
             layer.setPalette(name);
         }
         dockableFrame.setTitle(name);
-        dockableFrame.setTabTitle(name);
+        // dockableFrame.setTabTitle(name); // Removed in simplified implementation
         dockableFrame.setKey("customLayerPalette." + name);
     }
 

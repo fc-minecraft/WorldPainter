@@ -9,8 +9,8 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
-import com.jidesoft.plaf.LookAndFeelFactory;
-import com.jidesoft.utils.Lm;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import org.intellij.lang.annotations.Language;
 import org.pepsoft.util.*;
 import org.pepsoft.util.plugins.PluginManager;
@@ -101,10 +101,11 @@ public class Main {
 
         // Use a file lock to make sure only one instance is running with autosave enabled
         File configDir = Configuration.getConfigDir();
-        if (! configDir.isDirectory()) {
-            configDir.mkdirs();
+        Path configDirPath = configDir.toPath();
+        if (! Files.isDirectory(configDirPath)) {
+            Files.createDirectories(configDirPath);
         }
-        Path lockFilePath = new File(configDir, "wpsession.lock").toPath();
+        Path lockFilePath = configDirPath.resolve("wpsession.lock");
         try {
             Files.createFile(lockFilePath);
         } catch (FileAlreadyExistsException e) {
@@ -412,18 +413,6 @@ public class Main {
             world = null;
         }
 
-        // Install JIDE licence, if present
-        InputStream in = ClassLoader.getSystemResourceAsStream("jide_licence.properties");
-        if (in != null) {
-            try {
-                Properties jideLicenceProps = new Properties();
-                jideLicenceProps.load(in);
-                Lm.verifyLicense(jideLicenceProps.getProperty("companyName"), jideLicenceProps.getProperty("projectName"), jideLicenceProps.getProperty("licenceKey"));
-            } finally {
-                in.close();
-            }
-        }
-
         final Configuration.LookAndFeel lookAndFeel = (config.getLookAndFeel() != null) ? config.getLookAndFeel() : Configuration.LookAndFeel.SYSTEM;
         SwingUtilities.invokeLater(() -> {
             Configuration myConfig = Configuration.getInstance();
@@ -431,41 +420,37 @@ public class Main {
                 GUIUtils.setUIScale(1.0f);
                 logger.info("[SAFE MODE] Not installing visual theme");
             } else {
-                // Install configured look and feel
+                // Install configured look and feel (Modernized to FlatLaf)
                 try {
-                    String laf;
                     switch (lookAndFeel) {
                         case SYSTEM:
-                            laf = UIManager.getSystemLookAndFeelClassName();
+                            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                             break;
                         case METAL:
-                            laf = "javax.swing.plaf.metal.MetalLookAndFeel";
+                            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
                             break;
                         case NIMBUS:
-                            laf = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+                            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
                             break;
                         case DARK_METAL:
-                            laf = "org.netbeans.swing.laf.dark.DarkMetalLookAndFeel";
-                            IconUtils.setTheme("dark_metal");
-                            break;
                         case DARK_NIMBUS:
-                            laf = "org.netbeans.swing.laf.dark.DarkNimbusLookAndFeel";
-                            IconUtils.setTheme("dark_nimbus");
+                             // Replace legacy dark themes with FlatDarkLaf
+                            FlatDarkLaf.setup();
+                            IconUtils.setTheme("dark_metal"); // Keep icon theme if available
                             break;
                         default:
-                            throw new InternalError();
+                            // Default to FlatLightLaf
+                            FlatLightLaf.setup();
+                            break;
                     }
-                    logger.debug("Installing look and feel: " + laf);
-                    UIManager.setLookAndFeel(laf);
-                    LookAndFeelFactory.installJideExtension();
+
                     if (((lookAndFeel == Configuration.LookAndFeel.DARK_METAL)
                             || (lookAndFeel == Configuration.LookAndFeel.DARK_NIMBUS))) {
                         // Patch some things to make dark themes look better
-                        VoidRenderer.setColour(UIManager.getColor("Panel.background").getRGB());
-                        if (lookAndFeel == Configuration.LookAndFeel.DARK_METAL) {
-                            UIManager.put("ContentContainer.background", UIManager.getColor("desktop"));
-                            UIManager.put("JideTabbedPane.foreground", new Color(222, 222, 222));
-                        }
+                         Color panelBg = UIManager.getColor("Panel.background");
+                         if (panelBg != null) {
+                            VoidRenderer.setColour(panelBg.getRGB());
+                         }
                     }
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
                     logger.warn("Could not install selected look and feel", e);
