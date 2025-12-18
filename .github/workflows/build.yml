@@ -45,12 +45,17 @@ jobs:
           MAIN_JAR_PATH=$(find WorldPainter/WPGUI/build/libs -name "WPGUI-*.jar" | grep -v "plain" | head -n 1)
           cp "$MAIN_JAR_PATH" staging/
           echo "MAIN_JAR=$(basename "$MAIN_JAR_PATH")" >> $GITHUB_ENV
-          ICON_PATH=$(find WorldPainter/WPGUI -name "*.ico" | head -n 1)
-          if [ -n "$ICON_PATH" ]; then
-            cp "$ICON_PATH" staging/icon.ico
+          if [ -f "WorldPainter/WPGUI/src/main/resources/worldpainter.ico" ]; then
+            cp "WorldPainter/WPGUI/src/main/resources/worldpainter.ico" staging/icon.ico
             echo "ICON_ARG=--icon staging/icon.ico" >> $GITHUB_ENV
           else
-            echo "ICON_ARG=" >> $GITHUB_ENV
+            ICON_PATH=$(find WorldPainter/WPGUI -name "*.ico" | head -n 1)
+            if [ -n "$ICON_PATH" ]; then
+              cp "$ICON_PATH" staging/icon.ico
+              echo "ICON_ARG=--icon staging/icon.ico" >> $GITHUB_ENV
+            else
+              echo "ICON_ARG=" >> $GITHUB_ENV
+            fi
           fi
 
       - name: Package Windows
