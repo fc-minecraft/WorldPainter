@@ -2954,7 +2954,16 @@ public final class App extends JFrame implements BrushControl,
 
     private JPanel createStatusBar() {
         JPanel statusBar = new JPanel();
-        statusBar.setLayout(new FlowLayout(FlowLayout.LEADING));
+        statusBar.setLayout(new BoxLayout(statusBar, BoxLayout.LINE_AXIS));
+        statusBar.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+
+        Font statusFont = UIManager.getFont("Label.font");
+        if (statusFont == null) {
+            statusFont = new Font(Font.SANS_SERIF, Font.PLAIN, 14);
+        } else {
+            statusFont = statusFont.deriveFont(14.0f);
+        }
+
         StringBuilder warnings = new StringBuilder();
         Configuration config = Configuration.getInstance();
         if (config.isAutosaveEnabled() && config.isAutosaveInhibited()) {
@@ -2968,38 +2977,64 @@ public final class App extends JFrame implements BrushControl,
         }
         if (warnings.length() > 0) {
             JLabel warningsLabel = new JLabel(warnings.toString(), IconUtils.loadScaledIcon("org/pepsoft/worldpainter/icons/error.png"), SwingConstants.LEADING);
-            warningsLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+            warningsLabel.setFont(statusFont);
             statusBar.add(warningsLabel);
+            statusBar.add(Box.createHorizontalStrut(15));
         }
+
         locationLabel = new JLabel(MessageFormat.format(strings.getString("location.0.1"), "-99,999", "-99,999"));
-        locationLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        locationLabel.setFont(statusFont);
         statusBar.add(locationLabel);
+
+        statusBar.add(Box.createHorizontalStrut(15));
+
         heightLabel = new JLabel(MessageFormat.format(strings.getString("height.0.of.1"), "-9,999", "9,999"));
-        heightLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        heightLabel.setFont(statusFont);
         statusBar.add(heightLabel);
+
+        statusBar.add(Box.createHorizontalStrut(15));
+
         slopeLabel = new JLabel("Slope: 90°");
-        slopeLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        slopeLabel.setFont(statusFont);
         statusBar.add(slopeLabel);
+
+        statusBar.add(Box.createHorizontalStrut(15));
+
         materialLabel = new JLabel(MessageFormat.format(strings.getString("material.0"), Material.MOSSY_COBBLESTONE.toString()));
-        materialLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        materialLabel.setFont(statusFont);
         statusBar.add(materialLabel);
+
+        statusBar.add(Box.createHorizontalStrut(15));
+
         waterLabel = new JLabel(MessageFormat.format(strings.getString("fluid.level.1.depth.2"), 0, "-9,999", "9,999"));
-        waterLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        waterLabel.setFont(statusFont);
         statusBar.add(waterLabel);
+
+        statusBar.add(Box.createHorizontalStrut(15));
+
         biomeLabel = new JLabel("Auto biome: Mega Spruce Taiga Hills (ID 161)");
-        biomeLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        biomeLabel.setFont(statusFont);
         statusBar.add(biomeLabel);
+
+        statusBar.add(Box.createHorizontalGlue());
+
         radiusLabel = new JLabel(MessageFormat.format(strings.getString("radius.0"), 15984));
         radiusLabel.setToolTipText(strings.getString("scroll.the.mouse.wheel"));
-        radiusLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        radiusLabel.setFont(statusFont);
         statusBar.add(radiusLabel);
+
+        statusBar.add(Box.createHorizontalStrut(15));
+
         zoomLabel = new JLabel(MessageFormat.format(strings.getString("zoom.0"), 3200));
-        zoomLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        zoomLabel.setFont(statusFont);
         statusBar.add(zoomLabel);
+
+        statusBar.add(Box.createHorizontalStrut(15));
+
         final JProgressBar memoryBar = new JProgressBar();
-        memoryBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
         java.awt.Dimension preferredSize = memoryBar.getPreferredSize();
-        preferredSize.width = 100;
+        preferredSize.width = 120;
+        preferredSize.height = 20;
         memoryBar.setPreferredSize(preferredSize);
         memoryBar.addMouseListener(new MouseAdapter() {
             @Override
@@ -3782,7 +3817,7 @@ public final class App extends JFrame implements BrushControl,
         menu.add(menuItem);
 
         final Configuration config = Configuration.getInstance();
-        recentMenu = new JMenu("Recently used Worlds");
+        recentMenu = new JMenu(strings.getString("recently.used.worlds"));
         if ((config.getRecentFiles() != null) && (! config.getRecentFiles().isEmpty())) {
             updateRecentMenu();
         } else {
@@ -4164,7 +4199,7 @@ public final class App extends JFrame implements BrushControl,
         
         menu.addSeparator();
 
-        JMenu workspaceLayoutMenu = new JMenu("Workspace layout");
+        JMenu workspaceLayoutMenu = new JMenu(strings.getString("workspace.layout"));
 
         menuItem = new JMenuItem(ACTION_RESET_DOCKS);
         menuItem.setMnemonic('r');
@@ -4218,7 +4253,7 @@ public final class App extends JFrame implements BrushControl,
 
         menu.addSeparator();
 
-        menuItem = new JMenuItem("View world history...");
+        menuItem = new JMenuItem(strings.getString("view.world.history"));
         menuItem.addActionListener(e -> {
             if (world != null) {
                 WorldHistoryDialog dialog = new WorldHistoryDialog(this, world);
@@ -4270,7 +4305,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('p');
         menu.add(menuItem);
 
-        menuItem = new JMenuItem("Open custom materials folder");
+        menuItem = new JMenuItem(strings.getString("open.custom.materials.folder"));
         menuItem.addActionListener(e -> {
             File customMaterialsDir = new File(Configuration.getConfigDir(), "materials");
             if (! customMaterialsDir.exists()) {
@@ -4342,7 +4377,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('b');
         menu.add(menuItem);
 
-        menuItem = new JMenuItem("Run script...");
+        menuItem = new JMenuItem(strings.getString("run.script"));
         menuItem.addActionListener(e -> {
             try {
                 new ScriptRunner(this, world, dimension, undoManagers.values()).setVisible(true);
@@ -6699,13 +6734,13 @@ public final class App extends JFrame implements BrushControl,
     public static final String KEY_THUMBNAIL = "org.pepsoft.worldpainter.thumbnail";
     public static final String KEY_PAINT_ID = "org.pepsoft.worldpainter.paint.id";
 
-    public static final Insets BUTTON_INSETS = new Insets(6, 10, 6, 10) {
+    public static final Insets BUTTON_INSETS = new Insets(10, 14, 10, 14) {
         @Override
         public void set(int top, int left, int bottom, int right) {
             throw new UnsupportedOperationException();
         }
     };
-    public static final Insets SMALLER_BUTTON_INSETS = new Insets(4, 8, 4, 8) {
+    public static final Insets SMALLER_BUTTON_INSETS = new Insets(6, 10, 6, 10) {
         @Override
         public void set(int top, int left, int bottom, int right) {
             throw new UnsupportedOperationException();

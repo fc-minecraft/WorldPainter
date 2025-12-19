@@ -422,16 +422,15 @@ public class Main {
             } else {
                 // Install configured look and feel (Modernized to FlatLaf)
                 try {
+                    // Configure FlatLaf for a larger, modern, touch-friendly look
+                    UIManager.put("defaultFont", new Font(Font.SANS_SERIF, Font.PLAIN, 14));
+                    UIManager.put("Button.arc", 10);
+                    UIManager.put("Component.arrowType", "chevron");
+                    UIManager.put("ScrollBar.width", 16);
+                    UIManager.put("Button.margin", new Insets(8, 14, 8, 14));
+                    UIManager.put("Toolbar.buttonMargin", new Insets(8, 10, 8, 10));
+
                     switch (lookAndFeel) {
-                        case SYSTEM:
-                            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                            break;
-                        case METAL:
-                            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-                            break;
-                        case NIMBUS:
-                            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-                            break;
                         case DARK_METAL:
                         case DARK_NIMBUS:
                              // Replace legacy dark themes with FlatDarkLaf
@@ -439,7 +438,7 @@ public class Main {
                             IconUtils.setTheme("dark_metal"); // Keep icon theme if available
                             break;
                         default:
-                            // Default to FlatLightLaf
+                            // Default to FlatLightLaf for everything (System, Metal, Nimbus) to enforce modern look
                             FlatLightLaf.setup();
                             break;
                     }
@@ -452,7 +451,7 @@ public class Main {
                             VoidRenderer.setColour(panelBg.getRGB());
                          }
                     }
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+                } catch (RuntimeException e) {
                     logger.warn("Could not install selected look and feel", e);
                 }
 

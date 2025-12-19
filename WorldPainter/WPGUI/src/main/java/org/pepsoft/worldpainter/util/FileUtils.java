@@ -30,7 +30,7 @@ public class FileUtils {
         final Boolean old = UIManager.getBoolean("FileChooser.readOnly");
         UIManager.put("FileChooser.readOnly", TRUE);
         try {
-            if (SystemUtils.isMac()) {
+            if (SystemUtils.isMac() || SystemUtils.isWindows()) {
                 // On Macs the AWT file dialog looks much closer to native than the Swing one, so use it
                 return selectFileForOpenFallback(parent, title, fileOrDir, fileFilter);
             } else {
@@ -124,7 +124,7 @@ public class FileUtils {
         final Boolean old = UIManager.getBoolean("FileChooser.readOnly");
         UIManager.put("FileChooser.readOnly", TRUE);
         try {
-            if (SystemUtils.isMac()) {
+            if (SystemUtils.isMac() || SystemUtils.isWindows()) {
                 // On Macs the AWT file dialog looks much closer to native than the Swing one, so use it
                 return selectFilesForOpenFallback(parent, title, fileOrDir, fileFilter);
             } else {
@@ -169,7 +169,7 @@ public class FileUtils {
      * @return The selected file, or {@code null} if the user cancelled the dialog.
      */
     public static File selectFileForSave(Window parent, String title, File fileOrDir, final FileFilter fileFilter) {
-        if (SystemUtils.isMac()) {
+        if (SystemUtils.isMac() || SystemUtils.isWindows()) {
             // On Macs the AWT file dialog looks much closer to native than the Swing one, so use it
             return selectFileForSaveFallback(parent, title, fileOrDir, fileFilter);
         } else {

@@ -117,17 +117,6 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
         dispose();
     }
     
-    private void donate() {
-        try {
-            DesktopUtils.open(new URL("https://www.worldpainter.net/donate/paypal"));
-            Configuration config = Configuration.getInstance();
-            config.setDonationStatus(Configuration.DonationStatus.DONATED);
-            showInfo(this, strings.getString("the.donation.paypal.page.has.been.opened"), strings.getString("thank.you"));
-            config.logEvent(new EventVO(Constants.EVENT_KEY_DONATION_DONATE).addTimestamp());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private String loadTechInfo(World2 world, WorldPainter view, UndoManager undoManager) {
         File installDir = null;
@@ -209,13 +198,13 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
         jTextPane3 = new javax.swing.JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("About WorldPainter");
+        setTitle(strings.getString("about.worldpainter"));
         setResizable(false);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/pepsoft/worldpainter/resources/banner.png"))); // NOI18N
         jLabel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
 
-        buttonClose.setText("Close");
+        buttonClose.setText(strings.getString("close"));
         buttonClose.addActionListener(this::buttonCloseActionPerformed);
 
         jScrollPane1.setBorder(null);
@@ -225,7 +214,7 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
         jTextPane1.setText("<html>\n  <head>\n  </head>\n  <body>\n    <p style=\"margin-top: 0\">\nWorldPainter\n    </p>\n  </body>\n</html>");
         jScrollPane1.setViewportView(jTextPane1);
 
-        jTabbedPane1.addTab("About", jScrollPane1);
+        jTabbedPane1.addTab(strings.getString("about"), jScrollPane1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

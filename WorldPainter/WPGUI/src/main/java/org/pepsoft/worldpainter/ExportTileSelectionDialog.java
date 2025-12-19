@@ -152,18 +152,18 @@ public class ExportTileSelectionDialog extends WorldPainterDialog implements Win
         buttonSetSpawn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Select Tiles For Export");
+        setTitle(strings.getString("select.tiles.to.export")); // Reusing existing key or needing a new one? Let's assume we reuse or map it. Wait, the previous key I added was for the label.
 
-        jLabel1.setText("Dimension to export:");
+        jLabel1.setText(strings.getString("dimension.to.export"));
 
         jComboBox1.addActionListener(this::jComboBox1ActionPerformed);
 
-        jLabel2.setText("WorldPainter works in tiles of 128 by 128 blocks. Select tiles to export:");
+        jLabel2.setText(strings.getString("select.tiles.to.export"));
 
-        buttonClose.setText("OK");
+        buttonClose.setText(strings.getString("ok"));
         buttonClose.addActionListener(this::buttonCloseActionPerformed);
 
-        buttonSetSpawn.setText("Set Spawn");
+        buttonSetSpawn.setText(strings.getString("set.spawn"));
         buttonSetSpawn.setToolTipText("Move the spawn point to the indicated location");
         buttonSetSpawn.addActionListener(this::buttonSetSpawnActionPerformed);
 
@@ -237,6 +237,8 @@ public class ExportTileSelectionDialog extends WorldPainterDialog implements Win
     private org.pepsoft.worldpainter.TileSelector tileSelector1;
     // End of variables declaration//GEN-END:variables
     
+    private static final java.util.ResourceBundle strings = java.util.ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
+
     private final World2 world;
     private boolean programmaticChange;
     
