@@ -67,6 +67,12 @@ public class WorldPainter extends WorldPainterView implements MouseMotionListene
         enableInputMethods(false);
     }
 
+    public void setCustomBackground(BufferedImage image) {
+        this.customBackground = image;
+        setOpaque(image == null);
+        repaint();
+    }
+
     public WorldPainter(Dimension dimension, ColourScheme colourScheme, CustomBiomeManager customBiomeManager) {
         this(colourScheme, customBiomeManager);
         setDimension(dimension);
@@ -699,6 +705,17 @@ public class WorldPainter extends WorldPainterView implements MouseMotionListene
     
     @Override
     protected void paintComponent(Graphics g) {
+        if (customBackground != null) {
+            int w = getWidth();
+            int h = getHeight();
+            double scale = Math.max((double) w / customBackground.getWidth(), (double) h / customBackground.getHeight());
+            int newW = (int) (customBackground.getWidth() * scale);
+            int newH = (int) (customBackground.getHeight() * scale);
+            int x = (w - newW) / 2;
+            int y = (h - newH) / 2;
+            g.drawImage(customBackground, x, y, newW, newH, null);
+        }
+
         // Paint the tiles, grid and markers:
         super.paintComponent(g);
 
@@ -1062,6 +1079,7 @@ public class WorldPainter extends WorldPainterView implements MouseMotionListene
         }
     }
 
+    private BufferedImage customBackground;
     private HashSet<Layer> hiddenLayers = new HashSet<>();
     private final CustomBiomeManager customBiomeManager;
     private Dimension dimension, backgroundDimension; // TODO make this more generic

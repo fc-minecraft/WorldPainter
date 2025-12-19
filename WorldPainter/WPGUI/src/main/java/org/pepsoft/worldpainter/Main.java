@@ -465,6 +465,24 @@ public class Main {
             // Don't paint values above sliders in GTK look and feel
             UIManager.put("Slider.paintValue", Boolean.FALSE);
 
+            // Load splash screen
+            JWindow splashWindow = null;
+            try {
+                URL splashUrl = Main.class.getResource("/splash.png");
+                if (splashUrl != null) {
+                    ImageIcon splashIcon = new ImageIcon(splashUrl);
+                    splashWindow = new JWindow();
+                    splashWindow.getContentPane().add(new JLabel(splashIcon));
+                    splashWindow.pack();
+                    splashWindow.setLocationRelativeTo(null);
+                    splashWindow.setVisible(true);
+                } else {
+                    logger.warn("Splash image /splash.png not found");
+                }
+            } catch (Exception e) {
+                logger.error("Failed to show splash screen", e);
+            }
+
             final App app = App.getInstance();
             app.setVisible(true);
             // Swing quirk:
@@ -472,8 +490,12 @@ public class Main {
                 app.setExtendedState(Frame.MAXIMIZED_BOTH);
             }
 
+            final JWindow finalSplashWindow = splashWindow;
             // Do this later to give the app the chance to properly set itself up
             SwingUtilities.invokeLater(() -> {
+                if (finalSplashWindow != null) {
+                    finalSplashWindow.dispose();
+                }
                 if (world != null) {
                     // On a Mac we may be doing this unnecessarily because we may be opening a .world file, but it has
                     // proven difficult to detect that. TODO

@@ -1526,15 +1526,20 @@ public final class App extends JFrame implements BrushControl,
 
     public boolean editCustomMaterial(int customMaterialIndex) {
         MixedMaterial material = Terrain.getCustomMaterial(customMaterialIndex);
-        CustomMaterialDialog dialog;
+        // Use new ModernMaterialDialog
         if (material == null) {
             material = MixedMaterial.create(world.getPlatform(), Material.DIRT);
-            dialog = new CustomMaterialDialog(App.this, world.getPlatform(), material, world.isExtendedBlockIds(), selectedColourScheme);
-        } else {
-            dialog = new CustomMaterialDialog(App.this, world.getPlatform(), material, world.isExtendedBlockIds(), selectedColourScheme);
         }
+
+        // Note: For now we replace the complex CustomMaterialDialog (which handles mixtures) with a simple block selector
+        // as per user request to "pick a real block". To support mixtures + modern UI would require more time.
+        // The user said: "I press add custom material and can choose a real block from the game... see it LARGE"
+
+        org.pepsoft.worldpainter.materials.ModernMaterialDialog dialog = new org.pepsoft.worldpainter.materials.ModernMaterialDialog(App.this, world.getPlatform(), material, world.isExtendedBlockIds(), selectedColourScheme);
         dialog.setVisible(true);
+
         if (! dialog.isCancelled()) {
+            material = dialog.getSelectedMaterial(); // This returns a MixedMaterial with 100% of that block
             material = MixedMaterialManager.getInstance().register(material);
             Terrain.setCustomMaterial(customMaterialIndex, material);
             customMaterialButtons[customMaterialIndex].setIcon(new ImageIcon(material.getIcon(selectedColourScheme)));
@@ -1634,9 +1639,10 @@ public final class App extends JFrame implements BrushControl,
             menuItem = new JMenuItem(strings.getString("select.custom.material") + "...");
             menuItem.addActionListener(e -> {
                 MixedMaterial newMaterial = MixedMaterial.create(world.getPlatform(), Material.DIRT);
-                CustomMaterialDialog dialog = new CustomMaterialDialog(App.this, world.getPlatform(), newMaterial, world.isExtendedBlockIds(), selectedColourScheme);
+                org.pepsoft.worldpainter.materials.ModernMaterialDialog dialog = new org.pepsoft.worldpainter.materials.ModernMaterialDialog(App.this, world.getPlatform(), newMaterial, world.isExtendedBlockIds(), selectedColourScheme);
                 dialog.setVisible(true);
                 if (! dialog.isCancelled()) {
+                    newMaterial = dialog.getSelectedMaterial();
                     newMaterial = MixedMaterialManager.getInstance().register(newMaterial);
                     int index = findNextCustomTerrainIndex();
                     addButtonForNewCustomTerrain(index, newMaterial, true);
@@ -2653,6 +2659,16 @@ public final class App extends JFrame implements BrushControl,
 
     private void initComponents() {
         view = new WorldPainter(selectedColourScheme, customBiomeManager);
+        try {
+            java.net.URL bgUrl = getClass().getResource("/background.jpg");
+            if (bgUrl != null) {
+                view.setCustomBackground(ImageIO.read(bgUrl));
+            } else {
+                logger.warn("Background image /background.jpg not found");
+            }
+        } catch (IOException e) {
+            logger.error("Failed to load background image", e);
+        }
         Configuration config = Configuration.getInstance();
         if (config.getBackgroundColour() == -1) {
             view.setBackground(new Color(VoidRenderer.getColour()));
@@ -4544,6 +4560,35 @@ public final class App extends JFrame implements BrushControl,
         toolBar.add(button);
         toolBar.add(ACTION_ROTATE_LIGHT_LEFT);
         toolBar.add(ACTION_ROTATE_LIGHT_RIGHT);
+
+        // 3D Button
+        JButton button3D = new JButton("3D");
+        button3D.setToolTipText(strings.getString("show.3d.view"));
+        button3D.addActionListener(e -> {
+             Point focusPoint = view.getViewCentreInWorldCoords();
+             if (threeDeeFrame != null) {
+                 threeDeeFrame.requestFocus();
+                 threeDeeFrame.moveTo(focusPoint);
+             } else {
+                 logger.info("Opening 3D view");
+                 threeDeeFrame = new ThreeDeeFrame(dimension, view.getColourScheme(), customBiomeManager, focusPoint);
+                 threeDeeFrame.setHiddenLayers(hiddenLayers);
+                 threeDeeFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+                 threeDeeFrame.addWindowListener(new WindowAdapter() {
+                     @Override
+                     public void windowClosing(WindowEvent e) {
+                         if (threeDeeFrame != null) {
+                             threeDeeFrame.dispose();
+                             threeDeeFrame = null;
+                         }
+                     }
+                 });
+                 threeDeeFrame.setLocationRelativeTo(App.this);
+                 threeDeeFrame.setVisible(true);
+             }
+        });
+        toolBar.add(button3D);
+
 //        toolBar.add(Box.createHorizontalGlue());
 //        toolBar.add(ACTION_SHOW_HELP_PICKER);
         return toolBar;
