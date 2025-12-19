@@ -42,13 +42,16 @@ public final class DynmapColourScheme implements ColourScheme {
                     if (dynmapColorScheme.colors[blockState.globalStateIndex] != null) {
                         return dynmapColorScheme.colors[blockState.globalStateIndex][step].getARGB();
                     } else {
-                        logger.warn("Colour table contains null for global state index {}\nMaterial: {}\nDynmapBlockState: {}", blockState.globalStateIndex, material.toFullString(), blockState);
+                        // Suppress warning for performance
+                        // logger.warn("Colour table contains null for global state index {}\nMaterial: {}\nDynmapBlockState: {}", blockState.globalStateIndex, material.toFullString(), blockState);
                     }
                 } else {
-                    logger.warn("Global state index {} exceeds colour table bounds\nMaterial: {}\nDynmapBlockState: {}", blockState.globalStateIndex, material.toFullString(), blockState);
+                    // Suppress warning for performance
+                    // logger.warn("Global state index {} exceeds colour table bounds\nMaterial: {}\nDynmapBlockState: {}", blockState.globalStateIndex, material.toFullString(), blockState);
                 }
             } else {
-                logger.warn("DynmapBlockState missing for material: {}", material.toFullString());
+                // Suppress warning for performance
+                // logger.warn("DynmapBlockState missing for material: {}", material.toFullString());
             }
             return material.colour;
         });

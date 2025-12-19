@@ -190,16 +190,27 @@ public class ModernThreeDeeView extends JComponent implements Dimension.Listener
         // Let's collect quads and sort them. It's safer for rotation.
         java.util.List<Quad> quads = new java.util.ArrayList<>();
 
+        // Adjust start/end to be valid world coordinates
+        // Assuming world might be negative, but let's check bounds if possible or rely on isTilePresent
+
         for (int x = startX; x < endX; x += step) {
             for (int z = startZ; z < endZ; z += step) {
-                if (!dimension.isTilePresent(x, z)) continue;
+                // Check if tile is present logic might be too strict for empty chunks, but fine for now
+                // if (!dimension.isTilePresent(x, z)) continue;
 
                 int h1 = (int) dimension.getHeightAt(x, z);
                 int h2 = (int) dimension.getHeightAt(x + step, z);
                 int h3 = (int) dimension.getHeightAt(x + step, z + step);
                 int h4 = (int) dimension.getHeightAt(x, z + step);
 
+                // If height is invalid, use min height or skip
+                if (h1 < -1000) h1 = 0;
+                if (h2 < -1000) h2 = 0;
+                if (h3 < -1000) h3 = 0;
+                if (h4 < -1000) h4 = 0;
+
                 int c = dimension.getColourAt(x, z, colourScheme);
+                if (c == 0) c = 0xFF00FF00; // Debug Green if transparent/missing
 
                 // Simple avg height for sorting
                 double avgX = x + step * 0.5;

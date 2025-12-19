@@ -84,17 +84,28 @@ public class ModernMaterialDialog extends JDialog {
         gridPanel.removeAll();
         String q = query.toLowerCase();
 
-        // Material is not an enum in WPCore, it has getAllMaterials()
-        Collection<Material> materials = Material.getAllMaterials().stream()
-            .filter(m -> m.name != null && !m.name.contains("air"))
-            .sorted(Comparator.comparing(m -> m.name))
-            .collect(Collectors.toList());
+        // Optimize: Use distinct names only to avoid duplicates for every block state
+        Set<String> distinctNames = new HashSet<>();
+        List<Material> materials = new ArrayList<>();
+
+        for (Material m : Material.getAllMaterials()) {
+            if (m.name != null && !m.name.contains("air") && distinctNames.add(m.name)) {
+                materials.add(m);
+            }
+        }
+
+        materials.sort(Comparator.comparing(m -> m.name));
+
+        int limit = 500; // Limit displayed blocks to avoid lag
+        int count = 0;
 
         for (Material m : materials) {
-            String ruName = ruNames.getProperty(m.name.toLowerCase(), m.name);
+            String ruName = ruNames.getProperty(m.simpleName.toLowerCase(), m.name);
             if (ruName.toLowerCase().contains(q) || m.name.toLowerCase().contains(q)) {
                 JButton blockButton = createBlockButton(m, ruName);
                 gridPanel.add(blockButton);
+                count++;
+                if (count >= limit) break;
             }
         }
 
