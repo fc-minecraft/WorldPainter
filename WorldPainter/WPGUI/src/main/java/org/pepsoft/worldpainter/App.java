@@ -3439,8 +3439,8 @@ public final class App extends JFrame implements BrushControl,
             terrainPanel.add(checkBoxSoloTerrain, constraints);
         }
 
-        // Use FlowLayout for terrains too
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        // Use WrappingPanel for better wrapping
+        JPanel buttonPanel = new WrappingPanel(new FlowLayout(FlowLayout.LEADING));
         // Surface
         buttonPanel.add(createTerrainButton(GRASS));
         buttonPanel.add(createTerrainButton(PERMADIRT));
@@ -3544,9 +3544,8 @@ public final class App extends JFrame implements BrushControl,
     }
     
     private JPanel createCustomTerrainPanel() {
-        customTerrainPanel = new JPanel();
-        // Change from fixed GridLayout columns to FlowLayout for better wrapping of large icons
-        customTerrainPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+        // Use WrappingPanel
+        customTerrainPanel = new WrappingPanel(new FlowLayout(FlowLayout.LEADING));
 
         JButton addCustomTerrainButton = new JButton(ACTION_SHOW_CUSTOM_TERRAIN_POPUP);
         addCustomTerrainButton.setMargin(App.BUTTON_INSETS);
@@ -3558,8 +3557,8 @@ public final class App extends JFrame implements BrushControl,
     private JPanel createBrushPanel() {
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new GridBagLayout());
-        // Use FlowLayout or WrapLayout for brushes to handle resizing better
-        JPanel brushPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        // Use WrappingPanel
+        JPanel brushPanel = new WrappingPanel(new FlowLayout(FlowLayout.LEADING));
         brushPanel.add(createBrushButton(SymmetricBrush.SPIKE_CIRCLE));
         brushPanel.add(createBrushButton(SymmetricBrush.SPIKE_SQUARE));
         brushPanel.add(createBrushButton(new BitmapBrush(App.class.getResourceAsStream("resources/brush_noise.png"), strings.getString("noise"))));
@@ -3594,7 +3593,8 @@ public final class App extends JFrame implements BrushControl,
     private JPanel createCustomBrushPanel(String title, BrushGroup brushGroup) {
         JPanel customBrushesPanel = new JPanel();
         customBrushesPanel.setLayout(new GridBagLayout());
-        JPanel customBrushPanel = new JPanel(new GridLayout(0, 3));
+        // Use WrappingPanel
+        JPanel customBrushPanel = new WrappingPanel(new FlowLayout(FlowLayout.LEADING));
         for (Brush customBrush: brushGroup.brushes) {
             customBrushPanel.add(createBrushButton(customBrush));
         }
@@ -3613,6 +3613,37 @@ public final class App extends JFrame implements BrushControl,
         }
 
         return customBrushesPanel;
+    }
+
+    private static class WrappingPanel extends JPanel implements Scrollable {
+        public WrappingPanel(LayoutManager layout) {
+            super(layout);
+        }
+
+        @Override
+        public java.awt.Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 32;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 32;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
     
     private JPanel createBrushSettingsPanel() {

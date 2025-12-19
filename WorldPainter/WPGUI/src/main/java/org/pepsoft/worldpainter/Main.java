@@ -422,10 +422,14 @@ public class Main {
             } else {
                 // Install configured look and feel (Modernized to FlatLaf)
                 try {
-                    // Global UI Refinement for "Compact & Readable"
-                    UIManager.put("Tree.rowHeight", 24);
-                    UIManager.put("Button.margin", new Insets(4, 6, 4, 6));
-                    UIManager.put("defaultFont", new Font(Font.SANS_SERIF, Font.PLAIN, 14));
+                    // Global UI Refinement for "Modern & Large"
+                    UIManager.put("Tree.rowHeight", 28);
+                    UIManager.put("Button.margin", new Insets(6, 12, 6, 12));
+                    UIManager.put("defaultFont", new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+                    UIManager.put("ScrollBar.width", 16);
+                    UIManager.put("Button.arc", 10);
+                    UIManager.put("Component.arrowType", "chevron");
+                    UIManager.put("TabbedPane.tabHeight", 32);
 
                     switch (lookAndFeel) {
                         case SYSTEM:
