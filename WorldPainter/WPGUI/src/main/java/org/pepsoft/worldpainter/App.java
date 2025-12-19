@@ -962,11 +962,11 @@ public final class App extends JFrame implements BrushControl,
             for (Warning warning: warnings) {
                 switch (warning) {
                     case AUTO_BIOMES_DISABLED:
-                        if (showOptionDialog(this, "Automatic Biomes were previously enabled for this world but have been disabled.\nCheck documentation for how to reenable it.", "Automatic Biomes Disabled", DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {"OK"}, "OK") == 0) {
+                        if (showOptionDialog(this, strings.getString("auto.biomes.disabled.message"), strings.getString("auto.biomes.disabled"), DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {strings.getString("ok")}, strings.getString("ok")) == 0) {
                         }
                         break;
                     case AUTO_BIOMES_ENABLED:
-                        if (showOptionDialog(this, "Automatic Biomes were previously disabled for this world but have been enabled.\nCheck documentation for how to disable it.", "Automatic Biomes Enabled", DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {"OK"}, "OK") == 0) {
+                        if (showOptionDialog(this, strings.getString("auto.biomes.enabled.message"), strings.getString("auto.biomes.enabled"), DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {strings.getString("ok")}, strings.getString("ok")) == 0) {
                         }
                         break;
                     case MISSING_CUSTOM_TERRAINS:
@@ -3439,7 +3439,8 @@ public final class App extends JFrame implements BrushControl,
             terrainPanel.add(checkBoxSoloTerrain, constraints);
         }
 
-        JPanel buttonPanel = new JPanel(new GridLayout(0, 5));
+        // Use FlowLayout for terrains too
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
         // Surface
         buttonPanel.add(createTerrainButton(GRASS));
         buttonPanel.add(createTerrainButton(PERMADIRT));
@@ -3544,7 +3545,8 @@ public final class App extends JFrame implements BrushControl,
     
     private JPanel createCustomTerrainPanel() {
         customTerrainPanel = new JPanel();
-        customTerrainPanel.setLayout(new GridLayout(0, 4));
+        // Change from fixed GridLayout columns to FlowLayout for better wrapping of large icons
+        customTerrainPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
 
         JButton addCustomTerrainButton = new JButton(ACTION_SHOW_CUSTOM_TERRAIN_POPUP);
         addCustomTerrainButton.setMargin(App.BUTTON_INSETS);
@@ -3556,7 +3558,8 @@ public final class App extends JFrame implements BrushControl,
     private JPanel createBrushPanel() {
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new GridBagLayout());
-        JPanel brushPanel = new JPanel(new GridLayout(0, 3));
+        // Use FlowLayout or WrapLayout for brushes to handle resizing better
+        JPanel brushPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
         brushPanel.add(createBrushButton(SymmetricBrush.SPIKE_CIRCLE));
         brushPanel.add(createBrushButton(SymmetricBrush.SPIKE_SQUARE));
         brushPanel.add(createBrushButton(new BitmapBrush(App.class.getResourceAsStream("resources/brush_noise.png"), strings.getString("noise"))));
