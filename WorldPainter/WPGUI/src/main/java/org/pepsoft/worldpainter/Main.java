@@ -76,9 +76,9 @@ public class Main {
         // Work around a bug in the JIDE Docking Framework which otherwise causes duplicate mouse events on focus
         // switches resulting in uncommanded edits
         System.setProperty("docking.focusWorkaround1", "true");
-        // Disable Java2D's automatic UI scaling, as it does not do a good job with the editor view; we want to do it
-        // ourselves
-        System.setProperty("sun.java2d.uiScale.enabled", "false");
+        // Enable Java2D's automatic UI scaling for better support on high DPI screens
+        // System.setProperty("sun.java2d.uiScale.enabled", "false");
+        // FlatLaf handles scaling well, so we should allow it or control it via FlatLaf.
         // Propagate a few system properties to libraries
         final String devMode = System.getProperty("org.pepsoft.worldpainter.devMode");
         if (devMode != null) {

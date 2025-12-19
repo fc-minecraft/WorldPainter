@@ -962,21 +962,11 @@ public final class App extends JFrame implements BrushControl,
             for (Warning warning: warnings) {
                 switch (warning) {
                     case AUTO_BIOMES_DISABLED:
-                        if (showOptionDialog(this, "Automatic Biomes were previously enabled for this world but have been disabled.\nPress More Info for more information, including how to reenable it.", "Automatic Biomes Disabled", DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {"More Info", "OK"}, "OK") == 0) {
-                            try {
-                                DesktopUtils.open(new URL("https://www.worldpainter.net/doc/legacy/newautomaticbiomes"));
-                            } catch (MalformedURLException e) {
-                                throw new RuntimeException(e);
-                            }
+                        if (showOptionDialog(this, "Automatic Biomes were previously enabled for this world but have been disabled.\nCheck documentation for how to reenable it.", "Automatic Biomes Disabled", DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {"OK"}, "OK") == 0) {
                         }
                         break;
                     case AUTO_BIOMES_ENABLED:
-                        if (showOptionDialog(this, "Automatic Biomes were previously disabled for this world but have been enabled.\nPress More Info for more information, including how to disable it.", "Automatic Biomes Enabled", DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {"More Info", "OK"}, "OK") == 0) {
-                            try {
-                                DesktopUtils.open(new URL("https://www.worldpainter.net/doc/legacy/newautomaticbiomes"));
-                            } catch (MalformedURLException e) {
-                                throw new RuntimeException(e);
-                            }
+                        if (showOptionDialog(this, "Automatic Biomes were previously disabled for this world but have been enabled.\nCheck documentation for how to disable it.", "Automatic Biomes Enabled", DEFAULT_OPTION, WARNING_MESSAGE, null, new Object[] {"OK"}, "OK") == 0) {
                         }
                         break;
                     case MISSING_CUSTOM_TERRAINS:
@@ -1735,25 +1725,7 @@ public final class App extends JFrame implements BrushControl,
     }
 
     public void showHelp(Component component) {
-        String helpKey = null;
-        do {
-            if ((component instanceof AbstractButton) && (((AbstractButton) component).getAction() != null) && (((AbstractButton) component).getAction().getValue(KEY_HELP_KEY) != null)) {
-                helpKey = (String) ((AbstractButton) component).getAction().getValue(KEY_HELP_KEY);
-            } else if (component instanceof JComponent) {
-                helpKey = (String) ((JComponent) component).getClientProperty(KEY_HELP_KEY);
-            } else if (component instanceof RootPaneContainer) {
-                helpKey = (String) ((RootPaneContainer) component).getRootPane().getClientProperty(KEY_HELP_KEY);
-            }
-            component = component.getParent();
-        } while ((helpKey == null) && (component != null));
-        if (helpKey == null) {
-            throw new IllegalArgumentException("No help key found in hierarchy");
-        }
-        try {
-            DesktopUtils.open(new URL(HELP_ROOT_URL + encodeForURL(helpKey.toLowerCase())));
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Malformed help URL: " + HELP_ROOT_URL + encodeForURL(helpKey), e);
-        }
+        // External help links disabled as per user request
     }
 
     public void selectPaintOnMap(Set<PaintType> paintTypes, SelectionListener selectionListener) {
@@ -2954,7 +2926,16 @@ public final class App extends JFrame implements BrushControl,
 
     private JPanel createStatusBar() {
         JPanel statusBar = new JPanel();
-        statusBar.setLayout(new FlowLayout(FlowLayout.LEADING));
+        // Use GridBagLayout for better control and resizing behavior, similar to modern IDE status bars
+        statusBar.setLayout(new GridBagLayout());
+        // Modern flat border
+        statusBar.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridy = 0;
+        c.fill = HORIZONTAL;
+        c.insets = new Insets(0, 8, 0, 8); // Padding between elements
+
         StringBuilder warnings = new StringBuilder();
         Configuration config = Configuration.getInstance();
         if (config.isAutosaveEnabled() && config.isAutosaveInhibited()) {
@@ -2968,34 +2949,49 @@ public final class App extends JFrame implements BrushControl,
         }
         if (warnings.length() > 0) {
             JLabel warningsLabel = new JLabel(warnings.toString(), IconUtils.loadScaledIcon("org/pepsoft/worldpainter/icons/error.png"), SwingConstants.LEADING);
-            warningsLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-            statusBar.add(warningsLabel);
+            c.weightx = 0.0;
+            statusBar.add(warningsLabel, c);
+            statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
         }
+
         locationLabel = new JLabel(MessageFormat.format(strings.getString("location.0.1"), "-99,999", "-99,999"));
-        locationLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        statusBar.add(locationLabel);
+        c.weightx = 0.0;
+        statusBar.add(locationLabel, c);
+        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
+
         heightLabel = new JLabel(MessageFormat.format(strings.getString("height.0.of.1"), "-9,999", "9,999"));
-        heightLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        statusBar.add(heightLabel);
+        statusBar.add(heightLabel, c);
+        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
+
         slopeLabel = new JLabel("Slope: 90°");
-        slopeLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        statusBar.add(slopeLabel);
+        statusBar.add(slopeLabel, c);
+        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
+
         materialLabel = new JLabel(MessageFormat.format(strings.getString("material.0"), Material.MOSSY_COBBLESTONE.toString()));
-        materialLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        statusBar.add(materialLabel);
+        statusBar.add(materialLabel, c);
+        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
+
         waterLabel = new JLabel(MessageFormat.format(strings.getString("fluid.level.1.depth.2"), 0, "-9,999", "9,999"));
-        waterLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        statusBar.add(waterLabel);
+        statusBar.add(waterLabel, c);
+        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
+
         biomeLabel = new JLabel("Auto biome: Mega Spruce Taiga Hills (ID 161)");
-        biomeLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        statusBar.add(biomeLabel);
+        statusBar.add(biomeLabel, c);
+
+        // Push everything else to the left
+        c.weightx = 1.0;
+        statusBar.add(Box.createHorizontalGlue(), c);
+        c.weightx = 0.0;
+
+        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
+
         radiusLabel = new JLabel(MessageFormat.format(strings.getString("radius.0"), 15984));
         radiusLabel.setToolTipText(strings.getString("scroll.the.mouse.wheel"));
-        radiusLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        statusBar.add(radiusLabel);
+        statusBar.add(radiusLabel, c);
+        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
+
         zoomLabel = new JLabel(MessageFormat.format(strings.getString("zoom.0"), 3200));
-        zoomLabel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        statusBar.add(zoomLabel);
+        statusBar.add(zoomLabel, c);
         final JProgressBar memoryBar = new JProgressBar();
         memoryBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
         java.awt.Dimension preferredSize = memoryBar.getPreferredSize();
@@ -6441,11 +6437,7 @@ public final class App extends JFrame implements BrushControl,
         
         @Override
         public void performAction(ActionEvent event) {
-            try {
-                DesktopUtils.open(new URL("https://www.worldpainter.net/doc/"));
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
+            // External documentation links disabled as per user request
         }
     };
     

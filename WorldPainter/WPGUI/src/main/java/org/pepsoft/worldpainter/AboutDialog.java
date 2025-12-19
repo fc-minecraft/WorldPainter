@@ -117,17 +117,6 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
         dispose();
     }
     
-    private void donate() {
-        try {
-            DesktopUtils.open(new URL("https://www.worldpainter.net/donate/paypal"));
-            Configuration config = Configuration.getInstance();
-            config.setDonationStatus(Configuration.DonationStatus.DONATED);
-            showInfo(this, strings.getString("the.donation.paypal.page.has.been.opened"), strings.getString("thank.you"));
-            config.logEvent(new EventVO(Constants.EVENT_KEY_DONATION_DONATE).addTimestamp());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private String loadTechInfo(World2 world, WorldPainter view, UndoManager undoManager) {
         File installDir = null;
