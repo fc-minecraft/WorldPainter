@@ -40,28 +40,26 @@ public class GUIUtils {
      */
     public static BufferedImage scaleToUI(Image image, boolean smooth) {
         if (image == null) return null;
-        if (image instanceof BufferedImage) {
-            // If it is already a buffered image, maybe we just return it if scale is 1
-            // But for now let's implement basic scaling if needed.
-            // FlatLaf usually handles icon scaling if using SVG or MultiResolutionImage.
-            // But legacy code might expect explicit scaling.
-            int width = (int) (image.getWidth(null) * UI_SCALE_FLOAT);
-            int height = (int) (image.getHeight(null) * UI_SCALE_FLOAT);
-            if (width <= 0) width = 1;
-            if (height <= 0) height = 1;
+        
+        int width = (int) (image.getWidth(null) * UI_SCALE_FLOAT);
+        int height = (int) (image.getHeight(null) * UI_SCALE_FLOAT);
+        if (width <= 0) width = 1;
+        if (height <= 0) height = 1;
 
-            BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2 = resized.createGraphics();
-            if (smooth) {
-                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            }
-            g2.drawImage(image, 0, 0, width, height, null);
-            g2.dispose();
-            return resized;
+        if (image instanceof BufferedImage && width == image.getWidth(null) && height == image.getHeight(null)) {
+            return (BufferedImage) image;
         }
-        return (BufferedImage) image; // Fallback
+
+        BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resized.createGraphics();
+        if (smooth) {
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        g2.drawImage(image, 0, 0, width, height, null);
+        g2.dispose();
+        return resized;
     }
 
     public static void scaleToUI(Container container) {

@@ -63,8 +63,8 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        // Force language to English for now. TODO: remove this once the first translations are implemented
-        Locale.setDefault(Locale.US);
+        // Set default language to Russian
+        Locale.setDefault(new Locale("ru", "RU"));
 
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
 
@@ -474,23 +474,6 @@ public class Main {
 
             // Do this later to give the app the chance to properly set itself up
             SwingUtilities.invokeLater(() -> {
-                if (Version.isSnapshot() && ! myConfig.isMessageDisplayed(SNAPSHOT_MESSAGE_KEY)) {
-                    String result = JOptionPane.showInputDialog(app, SNAPSHOT_MESSAGE, "Snapshot Release", WARNING_MESSAGE);
-                    if (result == null) {
-                        // Cancel was pressed
-                        System.exit(0);
-                    }
-                    while (! result.toLowerCase().replace(" ", "").equals("iunderstand")) {
-                        DesktopUtils.beep();
-                        result = JOptionPane.showInputDialog(app, SNAPSHOT_MESSAGE, "Snapshot Release", WARNING_MESSAGE);
-                        if (result == null) {
-                            // Cancel was pressed
-                            System.exit(0);
-                        }
-                    }
-                    myConfig.setMessageDisplayed(SNAPSHOT_MESSAGE_KEY);
-                }
-
                 if (world != null) {
                     // On a Mac we may be doing this unnecessarily because we may be opening a .world file, but it has
                     // proven difficult to detect that. TODO
@@ -513,9 +496,6 @@ public class Main {
                 }
                 if (StartupMessages.getErrors().isEmpty() && StartupMessages.getWarnings().isEmpty() && StartupMessages.getMessages().isEmpty()) {
                     // Don't bother the user with this if we've already bothered them with errors and/or warnings
-                    if (! DonationDialog.maybeShowDonationDialog(app)) {
-                        MerchDialog.maybeShowMerchDialog(app);
-                    }
                 }
             });
         });
@@ -537,16 +517,6 @@ public class Main {
         logger.error("Exception while initialising configuration", e);
         StartupMessages.addError("Could not read configuration file! Configuration was reset.\n\nException type: " + e.getClass().getSimpleName() + "\nMessage: " + e.getMessage());
     }
-
-    @Language("HTML")
-    private static final String SNAPSHOT_MESSAGE = "<html><h1>Warning: Snapshot Release</h1>" +
-            "<p>This is a snapshot release of WorldPainter. It is for testing <em>only</em>!" +
-            "<p>Any worlds you edit with this version <strong>may not be loadable</strong> by the next production version<br>when that is released and <strong>will not be loadable</strong> by the current production version!" +
-            "<p><strong>Make backups</strong> of any existing worlds you wish to test with this release, in a safe location." +
-            "<p>Any or all work you do with this test release may be lost, and if you don't create backups,<br>you may lose your current worlds." +
-            "<p>Please report bugs on GitHub: https://github.com/Captain-Chaos/WorldPainter" +
-            "<p>Type \"I understand\" below to proceed with testing the next release of WorldPainter:</p></html>";
-    private static final String SNAPSHOT_MESSAGE_KEY = "org.pepsoft.worldpainter.snapshotWarning";
 
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Main.class);
 
