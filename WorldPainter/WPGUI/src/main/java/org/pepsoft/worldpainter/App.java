@@ -2821,15 +2821,7 @@ public final class App extends JFrame implements BrushControl,
         view.addMouseListener(viewListener);
         view.addMouseWheelListener(viewListener);
 
-        if (config.getShowCalloutCount() > 0) {
-            BufferedImage callout = loadCallout("callout_1");
-            view.addOverlay("callout_1", 0, dockingManager.getFrame("tools"), callout);
-            callout = loadCallout("callout_2");
-            view.addOverlay("callout_2", -callout.getWidth(), dockingManager.getFrame("brushes"), callout);
-            callout = loadCallout("callout_3");
-            view.addOverlay("callout_3", 0, dockingManager.getFrame("layers"), callout);
-            config.setShowCalloutCount(config.getShowCalloutCount() - 1);
-        }
+        // Callouts removed
 
         JRootPane rootPane = getRootPane();
         ActionMap actionMap = rootPane.getActionMap();
@@ -2956,32 +2948,8 @@ public final class App extends JFrame implements BrushControl,
         return new InfoPanel(view, customBiomeManager);
     }
 
-    private BufferedImage loadCallout(String key) {
-        try {
-            BufferedImage callout = ImageIO.read(App.class.getResourceAsStream("/org/pepsoft/worldpainter/" + key + ".png"));
-            callouts.put(key, callout);
-            return callout;
-        } catch (IOException e) {
-            throw new RuntimeException("I/O error loading callout image from classpath", e);
-        }
-    }
-
-    /**
-     * Close the callout with the specified key, if it is currently showing.
-     * Does nothing if it is not showing.
-     *
-     * @param key The key of the callout to close.
-     * @return {@code true} if the callout was showing and was closed;
-     * {@code false} otherwise.
-     */
     private boolean closeCallout(String key) {
-        if (callouts.containsKey(key)) {
-            view.removeOverlay(key);
-            callouts.remove(key);
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     private JPanel createStatusBar() {
@@ -4392,62 +4360,10 @@ public final class App extends JFrame implements BrushControl,
     }
 
     private JMenu createHelpMenu() {
-        JMenuItem menuItem = new JMenuItem(ACTION_OPEN_DOCUMENTATION);
-        menuItem.setMnemonic('d');
         JMenu menu = new JMenu(strings.getString("help"));
 //        menu.setMnemonic('h');
-        menu.add(menuItem);
-
-//        menu.add(ACTION_SHOW_HELP_PICKER);
-
-        menuItem = new JMenuItem("Frequently Asked Questions");
-        menuItem.setMnemonic('f');
-        menuItem.addActionListener(e -> {
-            try {
-                DesktopUtils.open(new URL("https://www.worldpainter.net/doc/faq"));
-            } catch (MalformedURLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        menu.add(menuItem);
-
-        menuItem = new JMenuItem("Troubleshooting");
-        menuItem.setMnemonic('t');
-        menuItem.addActionListener(e -> {
-            try {
-                DesktopUtils.open(new URL("https://www.worldpainter.net/trac/wiki/Troubleshooting"));
-            } catch (MalformedURLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        menu.add(menuItem);
-
-        menu.addSeparator();
-
-        menuItem = new JMenuItem("Donate");
-        menuItem.setMnemonic('d');
-        menuItem.addActionListener(e -> {
-            try {
-                DesktopUtils.open(new URL("https://www.worldpainter.net/donate/paypal"));
-            } catch (MalformedURLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        menu.add(menuItem);
-
-        menuItem = new JMenuItem("Merch store");
-        menuItem.setMnemonic('m');
-        menuItem.addActionListener(e -> {
-            try {
-                DesktopUtils.open(new URL("https://www.worldpainter.store/"));
-            } catch (MalformedURLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        menu.add(menuItem);
-
         if (! hideAbout) {
-            menuItem = new JMenuItem(strings.getString("about"));
+            JMenuItem menuItem = new JMenuItem(strings.getString("about"));
             menuItem.setMnemonic('a');
             menuItem.addActionListener(e -> {
                 AboutDialog dialog = new AboutDialog(App.this, world, view, currentUndoManager);
@@ -6783,13 +6699,13 @@ public final class App extends JFrame implements BrushControl,
     public static final String KEY_THUMBNAIL = "org.pepsoft.worldpainter.thumbnail";
     public static final String KEY_PAINT_ID = "org.pepsoft.worldpainter.paint.id";
 
-    public static final Insets BUTTON_INSETS = new Insets(3, 5, 3, 5) {
+    public static final Insets BUTTON_INSETS = new Insets(6, 10, 6, 10) {
         @Override
         public void set(int top, int left, int bottom, int right) {
             throw new UnsupportedOperationException();
         }
     };
-    public static final Insets SMALLER_BUTTON_INSETS = new Insets(2, 4, 2, 4) {
+    public static final Insets SMALLER_BUTTON_INSETS = new Insets(4, 8, 4, 8) {
         @Override
         public void set(int top, int left, int bottom, int right) {
             throw new UnsupportedOperationException();

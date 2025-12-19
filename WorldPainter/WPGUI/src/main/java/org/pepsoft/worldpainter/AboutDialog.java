@@ -102,37 +102,7 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
     @Override public void windowDeactivated(WindowEvent e) {}
 
     private String loadCredits() {
-        Font defaultTextPaneFont = jTextPane2.getFont();
-        Color textColour = jTextPane2.getForeground();
-        Color linkColour;
-        if (textColour.getRed() + textColour.getGreen() + textColour.getBlue() > 384) {
-            // Light text colour; use light link colour
-            linkColour = Color.CYAN;
-        } else {
-            linkColour = Color.BLUE;
-        }
-        String style = String.format("body {font-family: %s; font-size: %dpt; color: #%06x; background-color: #%06x;} a {color: #%06x;}",
-            defaultTextPaneFont.getFamily(), defaultTextPaneFont.getSize(), textColour.getRGB() & 0xffffff,
-            jTextPane2.getBackground().getRGB() & 0xffffff, linkColour.getRGB() & 0xffffff);
-        try (InputStreamReader in = new InputStreamReader(AboutDialog.class.getResourceAsStream("resources/credits.html"), UTF_8)){
-            StringBuilder sb = new StringBuilder();
-            char[] buffer = new char[BUFFER_SIZE];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                sb.append(buffer, 0, read);
-            }
-            String template = sb.toString();
-            MessageFormat formatter = new MessageFormat(template);
-            Configuration.DonationStatus donationStatus = Configuration.getInstance().getDonationStatus();
-            return formatter.format(new Object[] {
-                Version.VERSION,
-                (donationStatus != null)
-                    ? donationStatus.ordinal()
-                    : Configuration.DonationStatus.NO_THANK_YOU.ordinal(),
-                style});
-        } catch (IOException e) {
-            throw new RuntimeException("I/O error reading resource", e);
-        }
+        return "<html><body><p>WorldPainter " + Version.VERSION + "</p></body></html>";
     }
     
     private String loadChangelog() {
@@ -252,27 +222,10 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
 
         jTextPane1.setEditable(false);
         jTextPane1.setContentType("text/html"); // NOI18N
-        jTextPane1.setText("<html>\n  <head>\n  </head>\n  <body>\n    <p style=\"margin-top: 0\">\nEen paar regels<br>\nom te laten zien<br>\nhoe het er in het echt<br>\nuit zal zien.      \n    </p>\n  </body>\n</html>");
-        jTextPane1.addHyperlinkListener(this::jTextPane1HyperlinkUpdate);
+        jTextPane1.setText("<html>\n  <head>\n  </head>\n  <body>\n    <p style=\"margin-top: 0\">\nWorldPainter\n    </p>\n  </body>\n</html>");
         jScrollPane1.setViewportView(jTextPane1);
 
-        jTabbedPane1.addTab("Credits", jScrollPane1);
-
-        jScrollPane2.setBorder(null);
-
-        jTextPane2.setEditable(false);
-        jTextPane2.setText("Een paar regels\nom te laten zien\nhoe het er in het echt\nuit zal zien.");
-        jScrollPane2.setViewportView(jTextPane2);
-
-        jTabbedPane1.addTab("Change log", jScrollPane2);
-
-        jScrollPane3.setBorder(null);
-
-        jTextPane3.setEditable(false);
-        jTextPane3.setText("Een paar regels\nom te laten zien\nhoe het er in het echt\nuit zal zien.");
-        jScrollPane3.setViewportView(jTextPane3);
-
-        jTabbedPane1.addTab("Tech Info", jScrollPane3);
+        jTabbedPane1.addTab("About", jScrollPane1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -304,19 +257,6 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextPane1HyperlinkUpdate(javax.swing.event.HyperlinkEvent evt) {//GEN-FIRST:event_jTextPane1HyperlinkUpdate
-        if (evt.getEventType() == EventType.ACTIVATED) {
-            URL url = evt.getURL();
-            if (url.getProtocol().equals("action")) { // NOI18N
-                String action = url.getPath().toLowerCase().trim();
-                if (action.equals("/donate")) { // NOI18N
-                    donate();
-                }
-            } else {
-                DesktopUtils.open(url);
-            }
-        }
-    }//GEN-LAST:event_jTextPane1HyperlinkUpdate
 
     private void buttonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCloseActionPerformed
         close();
