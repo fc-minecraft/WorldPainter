@@ -1877,7 +1877,7 @@ public final class App extends JFrame implements BrushControl,
         Terrain.setCustomMaterial(index, customMaterial);
 
         if (customTerrainPanel == null) {
-            dockingManager.addFrame(new DockableFrameBuilder(createCustomTerrainPanel(), "Custom Terrain", DOCK_SIDE_WEST, 3).withId("customTerrain").scrollable().build());
+            dockingManager.addFrame(new DockableFrameBuilder(createCustomTerrainPanel(), strings.getString("dock.custom.terrain"), DOCK_SIDE_WEST, 3).withId("customTerrain").scrollable().build());
         }
 
         JToggleButton newButton = createTerrainButton(Terrain.getCustomTerrain(index));
@@ -2698,23 +2698,23 @@ public final class App extends JFrame implements BrushControl,
 
         scrollController.install();
 
-        dockingManager.addFrame(new DockableFrameBuilder(createToolPanel(), "Tools", DOCK_SIDE_WEST, 1).build());
+        dockingManager.addFrame(new DockableFrameBuilder(createToolPanel(), strings.getString("dock.tools"), DOCK_SIDE_WEST, 1).build());
 
-        dockingManager.addFrame(new DockableFrameBuilder(createToolSettingsPanel(), "Tool Settings", DOCK_SIDE_WEST, 2).expand().scrollable().build());
+        dockingManager.addFrame(new DockableFrameBuilder(createToolSettingsPanel(), strings.getString("dock.tool.settings"), DOCK_SIDE_WEST, 2).expand().scrollable().build());
 
-        dockingManager.addFrame(new DockableFrameBuilder(createLayerPanel(), "Layers", DOCK_SIDE_WEST, 3).build());
+        dockingManager.addFrame(new DockableFrameBuilder(createLayerPanel(), strings.getString("dock.layers"), DOCK_SIDE_WEST, 3).build());
 
-        dockingManager.addFrame(new DockableFrameBuilder(createTerrainPanel(), "Terrain", DOCK_SIDE_WEST, 3).build());
+        dockingManager.addFrame(new DockableFrameBuilder(createTerrainPanel(), strings.getString("dock.terrain"), DOCK_SIDE_WEST, 3).build());
 
-        biomesPanelFrame = new DockableFrameBuilder(createBiomesPanelContainer(), "Biomes", DOCK_SIDE_WEST, 3).scrollable().build();
+        biomesPanelFrame = new DockableFrameBuilder(createBiomesPanelContainer(), strings.getString("dock.biomes"), DOCK_SIDE_WEST, 3).scrollable().build();
         dockingManager.addFrame(biomesPanelFrame);
 
-        dockingManager.addFrame(new DockableFrameBuilder(createAnnotationsPanel(), "Annotations", DOCK_SIDE_WEST, 3).build());
+        dockingManager.addFrame(new DockableFrameBuilder(createAnnotationsPanel(), strings.getString("dock.annotations"), DOCK_SIDE_WEST, 3).build());
 
-        dockingManager.addFrame(new DockableFrameBuilder(createBrushPanel(), "Brushes", DOCK_SIDE_EAST, 1).build());
+        dockingManager.addFrame(new DockableFrameBuilder(createBrushPanel(), strings.getString("dock.brushes"), DOCK_SIDE_EAST, 1).build());
 
         if (customBrushes.containsKey(CUSTOM_BRUSHES_DEFAULT_TITLE)) {
-            dockingManager.addFrame(new DockableFrameBuilder(createCustomBrushPanel(CUSTOM_BRUSHES_DEFAULT_TITLE, customBrushes.get(CUSTOM_BRUSHES_DEFAULT_TITLE)), "Custom Brushes", DOCK_SIDE_EAST, 1).withId("customBrushesDefault").scrollable().build());
+            dockingManager.addFrame(new DockableFrameBuilder(createCustomBrushPanel(CUSTOM_BRUSHES_DEFAULT_TITLE, customBrushes.get(CUSTOM_BRUSHES_DEFAULT_TITLE)), strings.getString("dock.custom.brushes"), DOCK_SIDE_EAST, 1).withId("customBrushesDefault").scrollable().build());
         }
         for (Map.Entry<String, BrushGroup> entry: customBrushes.entrySet()) {
             if (entry.getKey().equals(CUSTOM_BRUSHES_DEFAULT_TITLE)) {
@@ -2723,10 +2723,10 @@ public final class App extends JFrame implements BrushControl,
             dockingManager.addFrame(new DockableFrameBuilder(createCustomBrushPanel(entry.getKey(), entry.getValue()), entry.getKey(), DOCK_SIDE_EAST, 1).withId("customBrushes." + entry.getKey()).scrollable().build());
         }
         
-        dockingManager.addFrame(new DockableFrameBuilder(createBrushSettingsPanel(), "Brush Settings", DOCK_SIDE_EAST, 2).withId("brushSettings").build());
+        dockingManager.addFrame(new DockableFrameBuilder(createBrushSettingsPanel(), strings.getString("dock.brush.settings"), DOCK_SIDE_EAST, 2).withId("brushSettings").build());
 
         infoPanel = createInfoPanel();
-        dockingManager.addFrame(new DockableFrameBuilder(infoPanel, "Info", DOCK_SIDE_EAST, 2).withId("infoPanel").expand().withIcon(loadScaledIcon("information")).build());
+        dockingManager.addFrame(new DockableFrameBuilder(infoPanel, strings.getString("dock.info"), DOCK_SIDE_EAST, 2).withId("infoPanel").expand().withIcon(loadScaledIcon("information")).build());
 
         if (config.getDefaultJideLayoutData() != null) {
             dockingManager.loadLayoutFrom(new ByteArrayInputStream(config.getDefaultJideLayoutData()));
@@ -5020,7 +5020,8 @@ public final class App extends JFrame implements BrushControl,
         final JToggleButton button = new JToggleButton();
         button.putClientProperty(KEY_PAINT_ID, createTerrainPaintId(terrain));
         button.setMargin(App.SMALLER_BUTTON_INSETS);
-        button.setIcon(new ImageIcon(terrain.getScaledIcon(18, selectedColourScheme)));
+        // Use 48px icons for larger, clearer block textures as requested
+        button.setIcon(new ImageIcon(terrain.getScaledIcon(48, selectedColourScheme)));
         button.setToolTipText(terrain.getName() + ": " + terrain.getDescription());
         button.addItemListener(event -> {
             if (event.getStateChange() == ItemEvent.SELECTED) {
@@ -5142,7 +5143,8 @@ public final class App extends JFrame implements BrushControl,
     }
 
     private JComponent createBrushButton(final Brush brush) {
-        final JToggleButton button = new LazyLoadingIconToggleButton((int) (32 * getUIScale()), () -> setBrushThumbnail(brush));
+        // Increase brush thumbnail size to 64px for better visibility
+        final JToggleButton button = new LazyLoadingIconToggleButton((int) (64 * getUIScale()), () -> setBrushThumbnail(brush));
         button.setMargin(new Insets(2, 2, 2, 2));
         button.setToolTipText(brush.getName());
         button.addItemListener(e -> {
@@ -5176,7 +5178,7 @@ public final class App extends JFrame implements BrushControl,
     }
 
     private Icon setBrushThumbnail(Brush brush) {
-        final Icon thumbnail = createBrushThumbnail(brush.clone(), round(32 * getUIScale()));
+        final Icon thumbnail = createBrushThumbnail(brush.clone(), round(64 * getUIScale()));
         final JToggleButton button = brushButtons.get(brush);
         button.putClientProperty(KEY_THUMBNAIL, thumbnail);
         updateBrushRotation(brush, button);
@@ -6296,9 +6298,9 @@ public final class App extends JFrame implements BrushControl,
         }
     };
 
-    private final BetterAction ACTION_SCALE_WORLD = new BetterAction("scale", "Scale...", ICON_SCALE_WORLD) {
+    private final BetterAction ACTION_SCALE_WORLD = new BetterAction("scale", strings.getString("scale"), ICON_SCALE_WORLD) {
         {
-            setShortDescription("Scale the entire map up or down by an arbitrary amount");
+            setShortDescription(strings.getString("scale.entire.map"));
         }
 
         @Override

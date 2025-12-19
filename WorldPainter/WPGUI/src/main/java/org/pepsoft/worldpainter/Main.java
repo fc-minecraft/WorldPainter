@@ -66,6 +66,11 @@ public class Main {
         // Set default language to Russian
         Locale.setDefault(new Locale("ru", "RU"));
 
+        // Force larger UI scale for modern look if not already set
+        if (System.getProperty("sun.java2d.uiScale") == null) {
+            System.setProperty("sun.java2d.uiScale", "2.0");
+        }
+
         Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
 
         // Set some hardcoded system properties we always want set:
@@ -422,6 +427,11 @@ public class Main {
             } else {
                 // Install configured look and feel (Modernized to FlatLaf)
                 try {
+                    // Global UI Refinement for "Compact & Readable"
+                    UIManager.put("Tree.rowHeight", 24);
+                    UIManager.put("Button.margin", new Insets(4, 6, 4, 6));
+                    UIManager.put("defaultFont", new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+
                     switch (lookAndFeel) {
                         case SYSTEM:
                             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
