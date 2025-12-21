@@ -608,12 +608,18 @@ public class Dimension extends InstanceKeeper implements TileProvider, Serializa
     }
 
     public int getColourAt(int x, int y, ColourScheme colourScheme) {
+        int height = getIntHeightAt(x, y);
+        if (height == Integer.MIN_VALUE) {
+            return 0;
+        }
         Tile tile = getTile(x >> TILE_SIZE_BITS, y >> TILE_SIZE_BITS);
         if (tile != null) {
-            return tile.getColour(x & TILE_SIZE_MASK, y & TILE_SIZE_MASK, colourScheme);
-        } else {
-            return 0; // Transparent
+            Terrain terrain = tile.getTerrain(x & TILE_SIZE_MASK, y & TILE_SIZE_MASK);
+            if (terrain != null) {
+                return terrain.getColour(seed, x, y, height, height, world.getPlatform(), colourScheme);
+            }
         }
+        return 0;
     }
 
     public float getLowestHeight() {
