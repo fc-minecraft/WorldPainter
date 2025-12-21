@@ -9,13 +9,11 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import org.intellij.lang.annotations.Language;
 import org.pepsoft.util.*;
 import org.pepsoft.util.plugins.PluginManager;
 import org.pepsoft.worldpainter.biomeschemes.BiomeSchemeManager;
-import org.pepsoft.worldpainter.layers.renderers.VoidRenderer;
+import org.pepsoft.worldpainter.theme.ThemeManager;
 import org.pepsoft.worldpainter.operations.MouseOrTabletOperation;
 import org.pepsoft.worldpainter.plugins.PlatformManager;
 import org.pepsoft.worldpainter.plugins.Plugin;
@@ -413,66 +411,11 @@ public class Main {
             world = null;
         }
 
-        final Configuration.LookAndFeel lookAndFeel = (config.getLookAndFeel() != null) ? config.getLookAndFeel() : Configuration.LookAndFeel.SYSTEM;
         SwingUtilities.invokeLater(() -> {
             Configuration myConfig = Configuration.getInstance();
-            if (myConfig.isSafeMode()) {
-                GUIUtils.setUIScale(1.0f);
-                logger.info("[SAFE MODE] Not installing visual theme");
-            } else {
-                // Install configured look and feel (Modernized to FlatLaf)
-                try {
-                    // Global UI Refinement for "Modern & Large"
-                    UIManager.put("Tree.rowHeight", 28);
-                    UIManager.put("Button.margin", new Insets(6, 12, 6, 12));
-                    UIManager.put("defaultFont", new Font(Font.SANS_SERIF, Font.PLAIN, 16));
-                    UIManager.put("ScrollBar.width", 16);
-                    UIManager.put("Button.arc", 10);
-                    UIManager.put("Component.arrowType", "chevron");
-                    UIManager.put("TabbedPane.tabHeight", 32);
 
-                    switch (lookAndFeel) {
-                        case SYSTEM:
-                            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                            break;
-                        case METAL:
-                            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-                            break;
-                        case NIMBUS:
-                            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-                            break;
-                        case DARK_METAL:
-                        case DARK_NIMBUS:
-                             // Replace legacy dark themes with FlatDarkLaf
-                            FlatDarkLaf.setup();
-                            IconUtils.setTheme("dark_metal"); // Keep icon theme if available
-                            break;
-                        default:
-                            // Default to FlatLightLaf
-                            FlatLightLaf.setup();
-                            break;
-                    }
-
-                    if (((lookAndFeel == Configuration.LookAndFeel.DARK_METAL)
-                            || (lookAndFeel == Configuration.LookAndFeel.DARK_NIMBUS))) {
-                        // Patch some things to make dark themes look better
-                         Color panelBg = UIManager.getColor("Panel.background");
-                         if (panelBg != null) {
-                            VoidRenderer.setColour(panelBg.getRGB());
-                         }
-                    }
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-                    logger.warn("Could not install selected look and feel", e);
-                }
-
-                if (getUIScale() != 1.0f) {
-                    // Scale the look and feel to the UI
-                    GUIUtils.scaleLookAndFeel(getUIScale());
-                }
-            }
-
-            // Don't paint values above sliders in GTK look and feel
-            UIManager.put("Slider.paintValue", Boolean.FALSE);
+            // Delegate theme initialization to the new manager
+            ThemeManager.initTheme(myConfig);
 
             final App app = App.getInstance();
             app.setVisible(true);

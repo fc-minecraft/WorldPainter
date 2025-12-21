@@ -578,16 +578,16 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
         buttonTestExport = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Exporting");
+        setTitle(strings.getString("dialog.export.title"));
 
-        buttonCancel.setText("Cancel");
+        buttonCancel.setText(strings.getString("dialog.export.button.cancel"));
         buttonCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonCancelActionPerformed(evt);
             }
         });
 
-        buttonExport.setText("Export");
+        buttonExport.setText(strings.getString("dialog.export.button.export"));
         buttonExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonExportActionPerformed(evt);
@@ -598,9 +598,9 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
 
         checkBoxGoodies.setSelected(true);
         checkBoxGoodies.setText(" ");
-        checkBoxGoodies.setToolTipText("Include a chest with tools and resources near spawn for you as the level designer");
+        checkBoxGoodies.setToolTipText(strings.getString("dialog.export.tooltip.goodies"));
 
-        jLabel1.setText("Map format:");
+        jLabel1.setText(strings.getString("dialog.export.label.map_format"));
 
         labelPlatform.setForeground(new java.awt.Color(0, 0, 255));
         labelPlatform.setText("<html><u>[EXPERIMENTAL] Minecraft 1.17</u></html>");
@@ -612,12 +612,12 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
         });
 
         labelPlatformWarning.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/pepsoft/worldpainter/icons/error.png"))); // NOI18N
-        labelPlatformWarning.setText("<html><b>unknown format</b></html>");
-        labelPlatformWarning.setToolTipText("<html>This map format is unknown and cannot be Exported. Most likely it<br>\nis supported by a plugin that is not installed or cannot be loaded.</html>");
+        labelPlatformWarning.setText("<html><b>" + strings.getString("dialog.export.warning.unknown_format") + "</b></html>");
+        labelPlatformWarning.setToolTipText("<html>" + strings.getString("dialog.export.warning.unknown_format_tooltip") + "</html>");
 
-        jLabel4.setText("Game settings");
+        jLabel4.setText(strings.getString("dialog.export.label.game_settings"));
 
-        jLabel5.setText("Game mode:");
+        jLabel5.setText(strings.getString("dialog.export.label.game_mode"));
 
         comboBoxGameType.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -627,29 +627,29 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
 
         checkBoxAllowCheats.setSelected(true);
         checkBoxAllowCheats.setText(" ");
-        checkBoxAllowCheats.setToolTipText("Whether to allow cheats (single player commands)");
+        checkBoxAllowCheats.setToolTipText(strings.getString("dialog.export.tooltip.cheats"));
 
-        jLabel6.setText("Difficulty:");
+        jLabel6.setText(strings.getString("dialog.export.label.difficulty"));
 
         comboBoxDifficulty.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Peaceful", "Easy", "Normal", "Hard" }));
 
         checkBoxMapFeatures.setSelected(true);
         checkBoxMapFeatures.setText(" ");
 
-        jLabel7.setText("General settings");
+        jLabel7.setText(strings.getString("dialog.export.label.general_settings"));
 
         jLabel8.setLabelFor(checkBoxAllowCheats);
-        jLabel8.setText("Allow cheats:");
+        jLabel8.setText(strings.getString("dialog.export.label.allow_cheats"));
 
         jLabel9.setLabelFor(checkBoxMapFeatures);
-        jLabel9.setText("Generate structures:");
+        jLabel9.setText(strings.getString("dialog.export.label.generate_structures"));
 
         jLabel10.setLabelFor(checkBoxGoodies);
-        jLabel10.setText("Include chest of goodies:");
+        jLabel10.setText(strings.getString("dialog.export.label.chest_of_goodies"));
 
-        jLabel2.setText("Directory:");
+        jLabel2.setText(strings.getString("dialog.export.label.directory"));
 
-        jLabel3.setText("Name:");
+        jLabel3.setText(strings.getString("dialog.export.label.name"));
 
         fieldDirectory.setText("jTextField1");
 
@@ -662,7 +662,7 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
             }
         });
 
-        jLabel11.setText("Data packs:");
+        jLabel11.setText(strings.getString("dialog.export.label.data_packs"));
 
         listDataPacks.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -672,7 +672,7 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
         jScrollPane1.setViewportView(listDataPacks);
 
         buttonAddDataPack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/pepsoft/worldpainter/icons/brick_add.png"))); // NOI18N
-        buttonAddDataPack.setToolTipText("Add a data pack");
+        buttonAddDataPack.setToolTipText(strings.getString("dialog.export.tooltip.add_data_pack"));
         buttonAddDataPack.setMargin(new java.awt.Insets(2, 2, 2, 2));
         buttonAddDataPack.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -681,7 +681,7 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
         });
 
         buttonRemoveDataPack.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/pepsoft/worldpainter/icons/brick_delete.png"))); // NOI18N
-        buttonRemoveDataPack.setToolTipText("Remove the selected data pack(s)");
+        buttonRemoveDataPack.setToolTipText(strings.getString("dialog.export.tooltip.remove_data_pack"));
         buttonRemoveDataPack.setEnabled(false);
         buttonRemoveDataPack.setMargin(new java.awt.Insets(2, 2, 2, 2));
         buttonRemoveDataPack.addActionListener(new java.awt.event.ActionListener() {
@@ -690,11 +690,11 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
             }
         });
 
-        jLabel12.setText("<html><i>Use at own risk. WorldPainter does</i> not <i>check the validity or version! <i></html>");
+        jLabel12.setText("<html><i>" + strings.getString("dialog.export.warning.data_pack_risk") + "<i></html>");
 
-        panelMinecraftWorldBorder.setBorder(javax.swing.BorderFactory.createTitledBorder("World Border"));
+        panelMinecraftWorldBorder.setBorder(javax.swing.BorderFactory.createTitledBorder(strings.getString("dialog.export.label.world_border")));
 
-        jLabel79.setText("Centre:");
+        jLabel79.setText(strings.getString("dialog.export.label.centre"));
 
         spinnerMcBorderCentreX.setModel(new javax.swing.SpinnerNumberModel(0, -99999, 99999, 1));
 
@@ -702,13 +702,13 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
 
         spinnerMcBorderCentreY.setModel(new javax.swing.SpinnerNumberModel(0, -99999, 99999, 1));
 
-        jLabel81.setText("Size:");
+        jLabel81.setText(strings.getString("dialog.export.label.size"));
 
         spinnerMcBorderSize.setModel(new javax.swing.SpinnerNumberModel(0, 0, 60000000, 1));
 
-        jLabel85.setText(" blocks");
+        jLabel85.setText(" " + strings.getString("dialog.export.label.blocks"));
 
-        jLabel86.setText(" blocks");
+        jLabel86.setText(" " + strings.getString("dialog.export.label.blocks"));
 
         javax.swing.GroupLayout panelMinecraftWorldBorderLayout = new javax.swing.GroupLayout(panelMinecraftWorldBorder);
         panelMinecraftWorldBorder.setLayout(panelMinecraftWorldBorderLayout);
@@ -876,9 +876,9 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
                 .addContainerGap())
         );
 
-        jTabbedPane1.addTab("General", jPanel1);
+        jTabbedPane1.addTab(strings.getString("dialog.export.tab.general"), jPanel1);
 
-        buttonTestExport.setText("Test Export...");
+        buttonTestExport.setText(strings.getString("dialog.export.button.test_export"));
         buttonTestExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonTestExportActionPerformed(evt);
@@ -1060,5 +1060,6 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
     private static Reference<World2> warningsForWorld;
 
     private static final Logger logger = LoggerFactory.getLogger(ExportWorldDialog.class);
+    private static final ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
     private static final long serialVersionUID = 1L;
 }

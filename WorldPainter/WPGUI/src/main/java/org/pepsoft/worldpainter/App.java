@@ -58,11 +58,13 @@ import org.pepsoft.worldpainter.tools.BiomesViewerFrame;
 import org.pepsoft.worldpainter.tools.Eyedropper.PaintType;
 import org.pepsoft.worldpainter.tools.Eyedropper.SelectionListener;
 import org.pepsoft.worldpainter.tools.RespawnPlayerDialog;
+import org.pepsoft.worldpainter.theme.ThemeManager;
 import org.pepsoft.worldpainter.tools.scripts.ScriptRunner;
 import org.pepsoft.worldpainter.util.*;
 import org.pepsoft.worldpainter.util.BetterAction;
 import org.pepsoft.worldpainter.util.FileFilter;
 import org.pepsoft.worldpainter.util.FileUtils;
+import org.pepsoft.worldpainter.util.swing.WrapLayout;
 import org.pepsoft.worldpainter.vo.AttributeKeyVO;
 import org.pepsoft.worldpainter.vo.EventVO;
 import org.pepsoft.worldpainter.vo.UsageVO;
@@ -3439,8 +3441,8 @@ public final class App extends JFrame implements BrushControl,
             terrainPanel.add(checkBoxSoloTerrain, constraints);
         }
 
-        // Use WrappingPanel for better wrapping
-        JPanel buttonPanel = new WrappingPanel(new FlowLayout(FlowLayout.LEADING));
+        // Use WrapLayout for better wrapping
+        JPanel buttonPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
         // Surface
         buttonPanel.add(createTerrainButton(GRASS));
         buttonPanel.add(createTerrainButton(PERMADIRT));
@@ -3544,8 +3546,8 @@ public final class App extends JFrame implements BrushControl,
     }
     
     private JPanel createCustomTerrainPanel() {
-        // Use WrappingPanel
-        customTerrainPanel = new WrappingPanel(new FlowLayout(FlowLayout.LEADING));
+        // Use WrapLayout
+        customTerrainPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
 
         JButton addCustomTerrainButton = new JButton(ACTION_SHOW_CUSTOM_TERRAIN_POPUP);
         addCustomTerrainButton.setMargin(App.BUTTON_INSETS);
@@ -3557,8 +3559,8 @@ public final class App extends JFrame implements BrushControl,
     private JPanel createBrushPanel() {
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new GridBagLayout());
-        // Use WrappingPanel
-        JPanel brushPanel = new WrappingPanel(new FlowLayout(FlowLayout.LEADING));
+        // Use WrapLayout
+        JPanel brushPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
         brushPanel.add(createBrushButton(SymmetricBrush.SPIKE_CIRCLE));
         brushPanel.add(createBrushButton(SymmetricBrush.SPIKE_SQUARE));
         brushPanel.add(createBrushButton(new BitmapBrush(App.class.getResourceAsStream("resources/brush_noise.png"), strings.getString("noise"))));
@@ -3593,8 +3595,8 @@ public final class App extends JFrame implements BrushControl,
     private JPanel createCustomBrushPanel(String title, BrushGroup brushGroup) {
         JPanel customBrushesPanel = new JPanel();
         customBrushesPanel.setLayout(new GridBagLayout());
-        // Use WrappingPanel
-        JPanel customBrushPanel = new WrappingPanel(new FlowLayout(FlowLayout.LEADING));
+        // Use WrapLayout
+        JPanel customBrushPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
         for (Brush customBrush: brushGroup.brushes) {
             customBrushPanel.add(createBrushButton(customBrush));
         }
@@ -3615,36 +3617,6 @@ public final class App extends JFrame implements BrushControl,
         return customBrushesPanel;
     }
 
-    private static class WrappingPanel extends JPanel implements Scrollable {
-        public WrappingPanel(LayoutManager layout) {
-            super(layout);
-        }
-
-        @Override
-        public java.awt.Dimension getPreferredScrollableViewportSize() {
-            return getPreferredSize();
-        }
-
-        @Override
-        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-            return 32;
-        }
-
-        @Override
-        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-            return 32;
-        }
-
-        @Override
-        public boolean getScrollableTracksViewportWidth() {
-            return true;
-        }
-
-        @Override
-        public boolean getScrollableTracksViewportHeight() {
-            return false;
-        }
-    }
     
     private JPanel createBrushSettingsPanel() {
         JPanel brushSettingsPanel = new JPanel();
@@ -4533,50 +4505,72 @@ public final class App extends JFrame implements BrushControl,
 
     private JToolBar createToolBar() {
         JToolBar toolBar = new JToolBar();
-        toolBar.add(ACTION_NEW_WORLD);
-        toolBar.add(ACTION_OPEN_WORLD);
-        toolBar.add(ACTION_SAVE_WORLD);
-        toolBar.add(ACTION_EXPORT_WORLD);
+        toolBar.setFloatable(false); // Modern apps rarely use floatable toolbars
+        toolBar.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+        addToolbarButton(toolBar, ACTION_NEW_WORLD);
+        addToolbarButton(toolBar, ACTION_OPEN_WORLD);
+        addToolbarButton(toolBar, ACTION_SAVE_WORLD);
+        addToolbarButton(toolBar, ACTION_EXPORT_WORLD);
         toolBar.addSeparator();
-        toolBar.add(ACTION_UNDO);
-        toolBar.add(ACTION_REDO);
+
+        addToolbarButton(toolBar, ACTION_UNDO);
+        addToolbarButton(toolBar, ACTION_REDO);
         toolBar.addSeparator();
-        toolBar.add(ACTION_ZOOM_OUT);
-        toolBar.add(ACTION_ZOOM_RESET);
-        toolBar.add(ACTION_ZOOM_IN);
+
+        addToolbarButton(toolBar, ACTION_ZOOM_OUT);
+        addToolbarButton(toolBar, ACTION_ZOOM_RESET);
+        addToolbarButton(toolBar, ACTION_ZOOM_IN);
         toolBar.addSeparator();
-        toolBar.add(ACTION_DIMENSION_PROPERTIES);
+
+        addToolbarButton(toolBar, ACTION_DIMENSION_PROPERTIES);
         if (! Configuration.getInstance().isEasyMode()) {
-            toolBar.add(ACTION_CHANGE_HEIGHT);
-            toolBar.add(ACTION_ROTATE_WORLD);
-            toolBar.add(ACTION_SHIFT_WORLD);
-            toolBar.add(ACTION_SCALE_WORLD);
+            addToolbarButton(toolBar, ACTION_CHANGE_HEIGHT);
+            addToolbarButton(toolBar, ACTION_ROTATE_WORLD);
+            addToolbarButton(toolBar, ACTION_SHIFT_WORLD);
+            addToolbarButton(toolBar, ACTION_SCALE_WORLD);
         }
-        toolBar.add(ACTION_EDIT_TILES);
+        addToolbarButton(toolBar, ACTION_EDIT_TILES);
         toolBar.addSeparator();
-        toolBar.add(ACTION_MOVE_TO_SPAWN);
-        toolBar.add(ACTION_MOVE_TO_ORIGIN);
+
+        addToolbarButton(toolBar, ACTION_MOVE_TO_SPAWN);
+        addToolbarButton(toolBar, ACTION_MOVE_TO_ORIGIN);
         toolBar.addSeparator();
-        JToggleButton button = new JToggleButton(ACTION_GRID);
-        button.setHideActionText(true);
-        toolBar.add(button);
-        button = new JToggleButton(ACTION_CONTOURS);
-        button.setHideActionText(true);
-        toolBar.add(button);
-        button = new JToggleButton(ACTION_OVERLAYS);
-        button.setHideActionText(true);
-        toolBar.add(button);
-        button = new JToggleButton(ACTION_VIEW_DISTANCE);
-        button.setHideActionText(true);
-        toolBar.add(button);
-        button = new JToggleButton(ACTION_WALKING_DISTANCE);
-        button.setHideActionText(true);
-        toolBar.add(button);
-        toolBar.add(ACTION_ROTATE_LIGHT_LEFT);
-        toolBar.add(ACTION_ROTATE_LIGHT_RIGHT);
-//        toolBar.add(Box.createHorizontalGlue());
-//        toolBar.add(ACTION_SHOW_HELP_PICKER);
+
+        addToolbarToggleButton(toolBar, ACTION_GRID);
+        addToolbarToggleButton(toolBar, ACTION_CONTOURS);
+        addToolbarToggleButton(toolBar, ACTION_OVERLAYS);
+        addToolbarToggleButton(toolBar, ACTION_VIEW_DISTANCE);
+        addToolbarToggleButton(toolBar, ACTION_WALKING_DISTANCE);
+
+        addToolbarButton(toolBar, ACTION_ROTATE_LIGHT_LEFT);
+        addToolbarButton(toolBar, ACTION_ROTATE_LIGHT_RIGHT);
+
         return toolBar;
+    }
+
+    private void addToolbarButton(JToolBar toolbar, Action action) {
+        JButton button = new JButton(action);
+        configureToolbarButton(button);
+        toolbar.add(button);
+    }
+
+    private void addToolbarToggleButton(JToolBar toolbar, Action action) {
+        JToggleButton button = new JToggleButton(action);
+        button.setHideActionText(true);
+        configureToolbarButton(button);
+        toolbar.add(button);
+    }
+
+    private void configureToolbarButton(AbstractButton button) {
+        button.setText(""); // Force icon only for cleaner look
+        button.setMargin(new Insets(4, 4, 4, 4));
+        button.setFocusable(false);
+        // Force a consistent square-ish size for standard toolbar buttons
+        java.awt.Dimension dim = new java.awt.Dimension(ThemeManager.ICON_SIZE_MEDIUM + 12, ThemeManager.ICON_SIZE_MEDIUM + 12);
+        button.setPreferredSize(dim);
+        button.setMinimumSize(dim);
+        button.setMaximumSize(dim);
     }
     
     private void addStatisticsTo(MenuElement menuElement, @NonNls final String key, final EventLogger eventLogger) {
