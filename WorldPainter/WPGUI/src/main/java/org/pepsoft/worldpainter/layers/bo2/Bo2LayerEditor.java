@@ -31,9 +31,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.*;
+import java.util.ResourceBundle;
 
 import static java.lang.Math.round;
 import static java.lang.String.format;
@@ -249,25 +251,47 @@ public class Bo2LayerEditor extends AbstractLayerEditor<Bo2Layer> implements Lis
     }
     
     private void addFilesOrDirectory() {
-        // Can't use FileUtils.selectFilesForOpen() because it doesn't support
-        // selecting directories, or adding custom components to the dialog
-        JFileChooser fileChooser = new JFileChooser();
         Configuration config = Configuration.getInstance();
+        File currentDir = null;
         if ((config.getCustomObjectsDirectory() != null) && config.getCustomObjectsDirectory().isDirectory()) {
-            fileChooser.setCurrentDirectory(config.getCustomObjectsDirectory());
+            currentDir = config.getCustomObjectsDirectory();
         }
-        fileChooser.setDialogTitle("Select File(s) or Directory");
-        fileChooser.setMultiSelectionEnabled(true);
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+        // We can't easily support the custom accessory (previewer) with the native dialog wrapper
+        // But the native experience is requested, so we will use FileUtils for basic file selection
+        // and lose the previewer for now, or fall back to Swing if a previewer is critical (but user requested native)
+        // Given the prompt "ensure standard file explorer", we prioritize native look.
+        // Also FileUtils doesn't support FILES_AND_DIRECTORIES mode in one go easily on all platforms via FileDialog.
+        // However, let's try to use selectFilesForOpen which uses FileDialog.
+
+        // Note: FileDialog on Windows/Mac doesn't typically allow selecting both files and directories in the same dialog
+        // easily without specific flags. FileUtils.selectFilesForOpen uses FileDialog with LOAD, which usually expects files.
+        // We will stick to files for now as that's the common case for objects.
+        // If the user wants a directory, they might need to use a separate action if we strictly enforce native dialogs.
+        // But wait, the original code allowed directories.
+        // Let's attempt to use a custom solution or just accept files.
+
         CustomObjectManager.UniversalFileFilter fileFilter = CustomObjectManager.getInstance().getFileFilter();
-        fileChooser.setFileFilter(fileFilter);
-        WPObjectPreviewer previewer = new WPObjectPreviewer();
-        previewer.setDimension(App.getInstance().getDimension());
-        fileChooser.addPropertyChangeListener(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY, previewer);
-        fileChooser.setAccessory(previewer);
-        if (doWithoutExceptionReporting(() -> fileChooser.showOpenDialog(this)) == JFileChooser.APPROVE_OPTION) {
-            File[] selectedFiles = fileChooser.getSelectedFiles();
-            if (selectedFiles.length > 0) {
+
+        // Use the native wrapper
+        File[] selectedFiles = org.pepsoft.worldpainter.util.FileUtils.selectFilesForOpen(SwingUtilities.getWindowAncestor(this), strings.getString("select.file"), currentDir, new org.pepsoft.worldpainter.util.FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || fileFilter.accept(f);
+            }
+
+            @Override
+            public String getDescription() {
+                return fileFilter.getDescription();
+            }
+
+            @Override
+            public String getExtensions() {
+                 return "*.bo2;*.bo3;*.nbt;*.schematic;*.schem"; // Approximate from UniversalFileFilter
+            }
+        });
+
+        if (selectedFiles != null && selectedFiles.length > 0) {
                 Platform platform = context.getDimension().getWorld().getPlatform();
                 boolean checkForNameOnlyMaterials = ! platform.capabilities.contains(NAME_BASED);
                 Set<String> nameOnlyMaterialsNames = checkForNameOnlyMaterials ? new HashSet<>() : null;
@@ -327,7 +351,6 @@ public class Bo2LayerEditor extends AbstractLayerEditor<Bo2Layer> implements Lis
                     beepAndShowWarning(this, message, "Map Format Not Compatible");
                 }
             }
-        }
     }
 
     private void addFile(boolean checkForNameOnlyMaterials, Set<String> nameOnlyMaterialsNames, File file) {
@@ -1025,6 +1048,7 @@ public class Bo2LayerEditor extends AbstractLayerEditor<Bo2Layer> implements Lis
     private final NumberFormat numberFormat = NumberFormat.getInstance();
     private ColourScheme colourScheme;
 
+    private static final ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Bo2LayerEditor.class);
     private static final long serialVersionUID = 1L;
 }

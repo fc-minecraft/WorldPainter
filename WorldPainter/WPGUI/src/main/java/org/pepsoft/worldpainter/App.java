@@ -91,6 +91,7 @@ import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
@@ -1248,7 +1249,7 @@ public final class App extends JFrame implements BrushControl,
                     if (recentFile.isFile()) {
                         open(recentFile, true);
                     } else {
-                        JOptionPane.showMessageDialog(App.this, "The file " + recentFile.getName() + " no longer exists\nin " + recentFile.getParent(), "File Removed", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(App.this, MessageFormat.format(strings.getString("error.file.removed.message"), recentFile.getName(), recentFile.getParent()), strings.getString("error.file.removed"), JOptionPane.ERROR_MESSAGE);
                     }
                 });
                 recentMenu.add(menuItem);
@@ -5380,7 +5381,7 @@ public final class App extends JFrame implements BrushControl,
                 .collect(toSet()), NOT_CANCELABLE);
         if (allTerrains.contains(customTerrain)) {
             Toolkit.getDefaultToolkit().beep();
-            JOptionPane.showMessageDialog(this, "Custom terrain \"" + name + "\" is still in use on the world.\nUse the Global Operations tool to replace it.", "Terrain In Use", ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, MessageFormat.format(strings.getString("error.terrain.in.use.message"), name), strings.getString("error.terrain.in.use"), ERROR_MESSAGE);
             return;
         }
 

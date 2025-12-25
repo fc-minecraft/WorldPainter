@@ -28,10 +28,12 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,7 +85,7 @@ public class ScriptRunner extends WorldPainterDialog {
     private void selectFile() {
         Set<String> extensions = new HashSet<>();
         SCRIPT_ENGINE_MANAGER.getEngineFactories().forEach(factory -> extensions.addAll(factory.getExtensions()));
-        File script = FileUtils.selectFileForOpen(this, "Select Script", (File) comboBoxScript.getSelectedItem(), new FileFilter() {
+        File script = FileUtils.selectFileForOpen(this, strings.getString("select.script"), (File) comboBoxScript.getSelectedItem(), new FileFilter() {
             @Override
             public boolean accept(File f) {
                 if (f.isDirectory()) {
@@ -704,6 +706,7 @@ public class ScriptRunner extends WorldPainterDialog {
     private ScriptingContext context;
     private Timer nonResponsiveScriptWarningTimer;
 
+    private static final ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
     private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
     private static final Pattern DESCRIPTOR_PATTERN = Pattern.compile("script\\.([.a-zA-Z_0-9]+)=(.+)$");
     private static final Map<String, ScriptEngine> SCRIPT_ENGINES = new HashMap<>();
@@ -964,12 +967,14 @@ public class ScriptRunner extends WorldPainterDialog {
             JButton button = new JButton("...");
             button.setToolTipText(description);
             button.addActionListener(e -> {
-                JFileChooser fileChooser = new JFileChooser();
+                File initialFile = null;
                 if (! field.getText().trim().isEmpty()) {
-                    fileChooser.setSelectedFile(new File(field.getText().trim()));
+                    initialFile = new File(field.getText().trim());
                 }
-                if (doWithoutExceptionReporting(() -> fileChooser.showOpenDialog(panel)) == JFileChooser.APPROVE_OPTION) {
-                    field.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                // We don't have a filter or title from the script descriptor here easily available, defaulting to generic
+                File selectedFile = FileUtils.selectFileForOpen(SwingUtilities.getWindowAncestor(panel), strings.getString("select.file"), initialFile, null);
+                if (selectedFile != null) {
+                    field.setText(selectedFile.getAbsolutePath());
                 }
             });
             panel.add(button, constraints);

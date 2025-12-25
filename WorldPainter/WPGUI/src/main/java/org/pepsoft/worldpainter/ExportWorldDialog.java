@@ -33,8 +33,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.*;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static java.util.function.Function.identity;
@@ -454,13 +456,9 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
     }
 
     private void selectDir() {
-        // Can't use FileUtils.selectFileForOpen() since it doesn't support
-        // selecting a directory
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setSelectedFile(new File(fieldDirectory.getText().trim()));
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        if (doWithoutExceptionReporting(() -> fileChooser.showOpenDialog(this)) == JFileChooser.APPROVE_OPTION) {
-            fieldDirectory.setText(fileChooser.getSelectedFile().getAbsolutePath());
+        File dir = org.pepsoft.worldpainter.util.FileUtils.selectDirectoryForOpen(this, strings.getString("select.directory"), new File(fieldDirectory.getText().trim()), null, null);
+        if (dir != null) {
+            fieldDirectory.setText(dir.getAbsolutePath());
         }
     }
     
