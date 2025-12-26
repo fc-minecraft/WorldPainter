@@ -81,6 +81,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.io.*;
+import javax.swing.Icon;
 import java.lang.Void;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -1126,9 +1127,9 @@ public final class App extends JFrame implements BrushControl,
             // biomes panel
             if (paintId.startsWith("Layer/Biome/")) {
                 biomesPanel.selectBiome(Integer.parseInt(paintId.substring(12)));
-                //if (! biomesPanelFrame.isShowing()) {
-                //    dockingManager.showFrame("biomes");
-                //}
+                if (sidePanel != null) {
+                    sidePanel.setSelectedIndex(4); // Select Biomes tab
+                }
                 return;
             }
         }
@@ -2703,12 +2704,12 @@ public final class App extends JFrame implements BrushControl,
         scrollController.install();
 
         sidePanel = new JTabbedPane(JTabbedPane.LEFT);
-        sidePanel.addTab(strings.getString("dock.tools"), createToolPanel());
-        sidePanel.addTab(strings.getString("dock.tool.settings"), createToolSettingsPanel());
-        sidePanel.addTab(strings.getString("dock.layers"), createLayerPanel());
-        sidePanel.addTab(strings.getString("dock.terrain"), createTerrainPanel());
-        sidePanel.addTab(strings.getString("dock.biomes"), createBiomesPanelContainer());
-        sidePanel.addTab(strings.getString("dock.annotations"), createAnnotationsPanel());
+        sidePanel.addTab(null, ICON_SETTINGS, createToolPanel(), strings.getString("dock.tools"));
+        sidePanel.addTab(null, ICON_SETTINGS, createToolSettingsPanel(), strings.getString("dock.tool.settings"));
+        sidePanel.addTab(null, ICON_LAYERS, createLayerPanel(), strings.getString("dock.layers"));
+        sidePanel.addTab(null, ICON_NO_TERRAIN, createTerrainPanel(), strings.getString("dock.terrain"));
+        sidePanel.addTab(null, ICON_BIOMES, createBiomesPanelContainer(), strings.getString("dock.biomes"));
+        sidePanel.addTab(null, ICON_ANNOTATIONS, createAnnotationsPanel(), strings.getString("dock.annotations"));
 
         dockingManager.addFrame(new DockableFrameBuilder(sidePanel, "Palette", DOCK_SIDE_WEST, 1).expand().build());
 
@@ -2956,8 +2957,9 @@ public final class App extends JFrame implements BrushControl,
         }
 
         locationLabel = new JLabel(MessageFormat.format(strings.getString("location.0.1"), "-99,999", "-99,999"));
-        c.weightx = 0.0;
+        c.weightx = 0.2; // Give it some weight to expand if needed
         statusBar.add(locationLabel, c);
+        c.weightx = 0.0;
         statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
 
         heightLabel = new JLabel(MessageFormat.format(strings.getString("height.0.of.1"), "-9,999", "9,999"));
@@ -3635,7 +3637,7 @@ public final class App extends JFrame implements BrushControl,
         levelSlider.setPaintLabels(false);
         levelSlider.addChangeListener(e -> {
             int value = levelSlider.getValue();
-            levelLabel.setText("Intensity: " + ((value < 52) ? (value - 1) : value) + " %");
+            levelLabel.setText(MessageFormat.format(strings.getString("set.intensity.to.0"), ((value < 52) ? (value - 1) : value)));
             if ((! programmaticChange) && (! levelSlider.getValueIsAdjusting())) {
                 float newLevel = value / 100.0f;
                 if (activeOperation instanceof PaintOperation) {
@@ -3659,7 +3661,7 @@ public final class App extends JFrame implements BrushControl,
         brushRotationSlider.setPaintLabels(false);
         brushRotationSlider.addChangeListener(e -> {
             int value = brushRotationSlider.getValue();
-            brushRotationLabel.setText("Rotation: " + ((value < 0) ? (((value - 7) / 15) * 15) : (((value + 7) / 15) * 15)) + "°");
+            brushRotationLabel.setText(strings.getString("brush.settings.rotation") + ": " + ((value < 0) ? (((value - 7) / 15) * 15) : (((value + 7) / 15) * 15)) + "°");
             if ((! programmaticChange) && (! brushRotationSlider.getValueIsAdjusting())) {
                 if (activeOperation instanceof PaintOperation) {
                     brushRotation = value;
@@ -3671,7 +3673,7 @@ public final class App extends JFrame implements BrushControl,
         });
         
         constraints.insets = new Insets(3, 1, 1, 1);
-        brushRotationLabel = new JLabel("Rotation: 0°");
+        brushRotationLabel = new JLabel(strings.getString("brush.settings.rotation") + ": 0°");
         brushSettingsPanel.add(brushRotationLabel, constraints);
         
         constraints.fill = HORIZONTAL;
@@ -3699,7 +3701,7 @@ public final class App extends JFrame implements BrushControl,
         
         constraints.fill = GridBagConstraints.NONE;
         constraints.insets = new Insets(3, 1, 1, 1);
-        brushSettingsPanel.add(new JLabel("Options"), constraints);
+        brushSettingsPanel.add(new JLabel(strings.getString("brush.settings.options")), constraints);
         
         constraints.insets = new Insets(1, 1, 1, 1);
         brushSettingsPanel.add(brushOptions, constraints);
@@ -4752,8 +4754,10 @@ public final class App extends JFrame implements BrushControl,
     }
     
     private void fixLabelSizes() {
-        locationLabel.setMinimumSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
-        locationLabel.setPreferredSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
+        //locationLabel.setMinimumSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
+        //locationLabel.setPreferredSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
+        locationLabel.setMinimumSize(null);
+        locationLabel.setPreferredSize(null);
         heightLabel.setMinimumSize(heightLabel.getSize());
         heightLabel.setPreferredSize(heightLabel.getSize());
         heightLabel.setMaximumSize(heightLabel.getSize());

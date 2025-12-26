@@ -28,6 +28,7 @@ import java.awt.event.MouseMotionListener;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.*;
+import java.util.ResourceBundle;
 
 import static org.pepsoft.worldpainter.App.INT_NUMBER_FORMAT;
 import static org.pepsoft.worldpainter.Constants.*;
@@ -256,27 +257,27 @@ public class InfoPanel extends javax.swing.JPanel implements MouseMotionListener
         jLabel4 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
 
-        jLabel1.setText("Slope:");
+        jLabel1.setText(strings.getString("info.slope") + ":");
 
-        jLabel2.setText("Layers:");
+        jLabel2.setText(strings.getString("layers") + ":");
 
         labelSlope.setText(" ");
 
-        jLabel5.setText("Coordinates:");
+        jLabel5.setText(strings.getString("info.location") + ":");
 
         labelCoords.setText(" ");
 
-        jLabel7.setText("Height:");
+        jLabel7.setText(strings.getString("info.height") + ":");
 
         labelHeight.setText(" ");
 
         jLabel10.setText("m");
 
-        labelFluidType.setText("Fluid");
+        labelFluidType.setText(strings.getString("structure.water"));
 
-        jLabel12.setText("level:");
+        jLabel12.setText(strings.getString("info.level") + ":");
 
-        jLabel13.setText("depth:");
+        jLabel13.setText(strings.getString("info.depth") + ":");
 
         labelWaterLevel.setText(" ");
 
@@ -299,12 +300,12 @@ public class InfoPanel extends javax.swing.JPanel implements MouseMotionListener
         ));
         jScrollPane2.setViewportView(jTable1);
 
-        jLabel3.setText("Terrain:");
+        jLabel3.setText(strings.getString("info.terrain") + ":");
 
         labelTerrain.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/pepsoft/worldpainter/icons/transparent.png"))); // NOI18N
         labelTerrain.setText(" ");
 
-        jLabel6.setText("Biome:");
+        jLabel6.setText(strings.getString("info.biome") + ":");
 
         labelBiome.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/pepsoft/worldpainter/icons/transparent.png"))); // NOI18N
         labelBiome.setText(" ");
@@ -318,9 +319,9 @@ public class InfoPanel extends javax.swing.JPanel implements MouseMotionListener
         checkBoxInSelection.setEnabled(false);
         checkBoxInSelection.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
 
-        jLabel4.setText("In selection:");
+        jLabel4.setText(strings.getString("brush.settings.inside.selection") + ":");
 
-        jLabel8.setText("automatic");
+        jLabel8.setText(strings.getString("auto.biomes"));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -470,6 +471,7 @@ public class InfoPanel extends javax.swing.JPanel implements MouseMotionListener
     private static final Set<Layer> HIDDEN_LAYERS = ImmutableSet.<Layer>builder().addAll(SYSTEM_LAYERS).add(Biome.INSTANCE).build();
     private static final Icon ICON_BLANK = IconUtils.loadScaledIcon("org/pepsoft/worldpainter/icons/transparent.png");
     private static final Logger logger = LoggerFactory.getLogger(InfoPanel.class);
+    private static final ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
 
     static class LayerTableModel implements TableModel {
         boolean update(Map<Layer, Integer> intensities) {
@@ -615,7 +617,7 @@ public class InfoPanel extends javax.swing.JPanel implements MouseMotionListener
         private final Map<Layer, Integer> layerIndices = new HashMap<>();
         private final List<TableModelListener> listeners = new ArrayList<>();
 
-        private static final String[] COLUMN_NAMES = {"Layer", "Intensity"};
+        private static final String[] COLUMN_NAMES = {strings.getString("layers"), strings.getString("info.intensity")};
 
         static class InfoRow {
             InfoRow(Layer layer, int intensity) {

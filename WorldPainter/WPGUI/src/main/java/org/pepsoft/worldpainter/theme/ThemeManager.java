@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 /**
  * Centralized manager for UI Theme, Fonts, Colors, and Layout constants.
@@ -31,16 +32,16 @@ public class ThemeManager {
     public static final int FONT_SIZE_HEADER = 24;
 
     // --- Layout Metrics ---
-    public static final int BUTTON_ARC = 999; // Capsule style for more modern look
-    public static final int COMPONENT_ARC = 20; // Soft corners for panels/inputs
-    public static final int SCROLLBAR_WIDTH = 24; // Wider scrollbars for easier grabbing
-    public static final int ROW_HEIGHT = 40; // Taller rows for touch/easy clicking
-    public static final int TAB_HEIGHT = 48; // Large tabs
+    public static final int BUTTON_ARC = 12; // Modern rounded corners (not capsule)
+    public static final int COMPONENT_ARC = 12; // Consistent rounded corners
+    public static final int SCROLLBAR_WIDTH = 20; // Slightly narrower but still accessible
+    public static final int ROW_HEIGHT = 36; // Compact but touch-friendly
+    public static final int TAB_HEIGHT = 40; // Compact tabs
     public static final int GAP_SMALL = 8;
     public static final int GAP_MEDIUM = 16;
     public static final int GAP_LARGE = 24;
 
-    public static final Insets BUTTON_MARGINS = new Insets(10, 20, 10, 20); // Big buttons
+    public static final Insets BUTTON_MARGINS = new Insets(4, 8, 4, 8); // Compact buttons
     public static final Insets DIALOG_PADDING = new Insets(24, 24, 24, 24);
 
     // --- Icon Sizes ---
@@ -96,6 +97,13 @@ public class ThemeManager {
     }
 
     private static void applyGlobalDefaults() {
+        // Localization for standard dialogs
+        ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
+        UIManager.put("OptionPane.yesButtonText", strings.getString("option.yes"));
+        UIManager.put("OptionPane.noButtonText", strings.getString("option.no"));
+        UIManager.put("OptionPane.cancelButtonText", strings.getString("option.cancel"));
+        UIManager.put("OptionPane.okButtonText", strings.getString("option.ok"));
+
         // Core Font
         Font baseFont = new Font(FONT_NAME, Font.PLAIN, FONT_SIZE_BASE);
         UIManager.put("defaultFont", baseFont);
