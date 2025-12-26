@@ -59,6 +59,7 @@ import org.pepsoft.worldpainter.tools.Eyedropper.PaintType;
 import org.pepsoft.worldpainter.tools.Eyedropper.SelectionListener;
 import org.pepsoft.worldpainter.tools.RespawnPlayerDialog;
 import org.pepsoft.worldpainter.theme.ThemeManager;
+import org.pepsoft.worldpainter.ui.*;
 import org.pepsoft.worldpainter.tools.scripts.ScriptRunner;
 import org.pepsoft.worldpainter.util.*;
 import org.pepsoft.worldpainter.util.BetterAction;
@@ -2697,23 +2698,17 @@ public final class App extends JFrame implements BrushControl,
 
         setJMenuBar(createMenuBar());
         
-        getContentPane().add(createToolBar(), BorderLayout.NORTH);
+        getContentPane().add(ToolbarFactory.create(this), BorderLayout.NORTH);
 
-        getContentPane().add(createStatusBar(), BorderLayout.SOUTH);
+        getContentPane().add(StatusBarFactory.create(this), BorderLayout.SOUTH);
 
         scrollController.install();
 
-        sidePanel = new JTabbedPane(JTabbedPane.LEFT);
-        sidePanel.addTab(null, ICON_SETTINGS, createToolPanel(), strings.getString("dock.tools"));
-        sidePanel.addTab(null, ICON_SETTINGS, createToolSettingsPanel(), strings.getString("dock.tool.settings"));
-        sidePanel.addTab(null, ICON_LAYERS, createLayerPanel(), strings.getString("dock.layers"));
-        sidePanel.addTab(null, ICON_NO_TERRAIN, createTerrainPanel(), strings.getString("dock.terrain"));
-        sidePanel.addTab(null, ICON_BIOMES, createBiomesPanelContainer(), strings.getString("dock.biomes"));
-        sidePanel.addTab(null, ICON_ANNOTATIONS, createAnnotationsPanel(), strings.getString("dock.annotations"));
+        sidePanel = PanelFactory.createPalette(this);
 
         dockingManager.addFrame(new DockableFrameBuilder(sidePanel, "Palette", DOCK_SIDE_WEST, 1).expand().build());
 
-        dockingManager.addFrame(new DockableFrameBuilder(createBrushPanel(), strings.getString("dock.brushes"), DOCK_SIDE_EAST, 1).build());
+        dockingManager.addFrame(new DockableFrameBuilder(PanelFactory.createBrushPanel(this), strings.getString("dock.brushes"), DOCK_SIDE_EAST, 1).build());
 
         if (customBrushes.containsKey(CUSTOM_BRUSHES_DEFAULT_TITLE)) {
             dockingManager.addFrame(new DockableFrameBuilder(createCustomBrushPanel(CUSTOM_BRUSHES_DEFAULT_TITLE, customBrushes.get(CUSTOM_BRUSHES_DEFAULT_TITLE)), strings.getString("dock.custom.brushes"), DOCK_SIDE_EAST, 1).withId("customBrushesDefault").scrollable().build());
@@ -2926,109 +2921,8 @@ public final class App extends JFrame implements BrushControl,
         return false;
     }
 
-    private JPanel createStatusBar() {
-        JPanel statusBar = new JPanel();
-        // Use GridBagLayout for better control and resizing behavior, similar to modern IDE status bars
-        statusBar.setLayout(new GridBagLayout());
-        // Modern flat border
-        statusBar.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridy = 0;
-        c.fill = HORIZONTAL;
-        c.insets = new Insets(0, 8, 0, 8); // Padding between elements
-
-        StringBuilder warnings = new StringBuilder();
-        Configuration config = Configuration.getInstance();
-        if (config.isAutosaveEnabled() && config.isAutosaveInhibited()) {
-            warnings.append("Autosave disabled");
-        }
-        if (config.isSafeMode()) {
-            if (warnings.length() > 0) {
-                warnings.append(": ");
-            }
-            warnings.append("Safe mode");
-        }
-        if (warnings.length() > 0) {
-            JLabel warningsLabel = new JLabel(warnings.toString(), IconUtils.loadScaledIcon("org/pepsoft/worldpainter/icons/error.png"), SwingConstants.LEADING);
-            c.weightx = 0.0;
-            statusBar.add(warningsLabel, c);
-            statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
-        }
-
-        locationLabel = new JLabel(MessageFormat.format(strings.getString("location.0.1"), "-99,999", "-99,999"));
-        c.weightx = 0.2; // Give it some weight to expand if needed
-        statusBar.add(locationLabel, c);
-        c.weightx = 0.0;
-        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
-
-        heightLabel = new JLabel(MessageFormat.format(strings.getString("height.0.of.1"), "-9,999", "9,999"));
-        statusBar.add(heightLabel, c);
-        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
-
-        slopeLabel = new JLabel("Slope: 90°");
-        statusBar.add(slopeLabel, c);
-        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
-
-        materialLabel = new JLabel(MessageFormat.format(strings.getString("material.0"), Material.MOSSY_COBBLESTONE.toString()));
-        statusBar.add(materialLabel, c);
-        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
-
-        waterLabel = new JLabel(MessageFormat.format(strings.getString("fluid.level.1.depth.2"), 0, "-9,999", "9,999"));
-        statusBar.add(waterLabel, c);
-        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
-
-        biomeLabel = new JLabel("Auto biome: Mega Spruce Taiga Hills (ID 161)");
-        statusBar.add(biomeLabel, c);
-
-        // Push everything else to the left
-        c.weightx = 1.0;
-        statusBar.add(Box.createHorizontalGlue(), c);
-        c.weightx = 0.0;
-
-        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
-
-        radiusLabel = new JLabel(MessageFormat.format(strings.getString("radius.0"), 15984));
-        radiusLabel.setToolTipText(strings.getString("scroll.the.mouse.wheel"));
-        statusBar.add(radiusLabel, c);
-        statusBar.add(new JSeparator(JSeparator.VERTICAL), c);
-
-        zoomLabel = new JLabel(MessageFormat.format(strings.getString("zoom.0"), 3200));
-        statusBar.add(zoomLabel, c);
-        final JProgressBar memoryBar = new JProgressBar();
-        memoryBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        java.awt.Dimension preferredSize = memoryBar.getPreferredSize();
-        preferredSize.width = 100;
-        memoryBar.setPreferredSize(preferredSize);
-        memoryBar.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Forcing garbage collect");
-                }
-                System.gc();
-            }
-        });
-        statusBar.add(memoryBar);
-        new Timer(2500, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                long free = runtime.freeMemory();
-                long total = runtime.totalMemory();
-                long max = runtime.maxMemory();
-                long inUse = total - free;
-                memoryBar.setValue((int) (inUse * 100 / max));
-                int inUseMB = (int) (inUse / ONE_MEGABYTE);
-                int maxMB = (int) (max / ONE_MEGABYTE);
-                memoryBar.setToolTipText(MessageFormat.format(strings.getString("memory.usage.0.mb.of.1.mb"), inUseMB, maxMB));
-            }
-            
-            private final Runtime runtime = Runtime.getRuntime();
-        }).start();
-        return statusBar;
-    }
-
-    private JPanel createToolPanel() {
+    public JPanel createToolPanel() {
         JPanel toolPanel = new JPanel();
         toolPanel.setLayout(new GridLayout(0, 4));
         // TODO: use function keys as accelerators?
@@ -3143,12 +3037,12 @@ public final class App extends JFrame implements BrushControl,
         return toolPanel;
     }
 
-    private JPanel createToolSettingsPanel() {
+    public JPanel createToolSettingsPanel() {
         toolSettingsPanel = new JPanel(new BorderLayout());
         return toolSettingsPanel;
     }
     
-    private JPanel createLayerPanel() {
+    public JPanel createLayerPanel() {
         final JPanel layerPanel = new JPanel();
         layerPanel.setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -3291,7 +3185,7 @@ public final class App extends JFrame implements BrushControl,
         return view.setColourRamp(new ColourGradient(dimension.getMinHeight(), 0x000000, dimension.getMaxHeight(), 0xffffff, LINEAR));
     }
 
-    private JPanel createBiomesPanelContainer() {
+    public JPanel createBiomesPanelContainer() {
         final JPanel biomesPanelContainer = new JPanel();
         biomesPanelContainer.setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -3345,7 +3239,7 @@ public final class App extends JFrame implements BrushControl,
         return biomesPanelContainer;
     }
 
-    private JPanel createAnnotationsPanel() {
+    public JPanel createAnnotationsPanel() {
         final JPanel layerPanel = new JPanel();
         layerPanel.setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -3425,7 +3319,7 @@ public final class App extends JFrame implements BrushControl,
         return null;
     }
 
-    private JPanel createTerrainPanel() {
+    public JPanel createTerrainPanel() {
         JPanel terrainPanel = new JPanel();
         terrainPanel.setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -3557,7 +3451,7 @@ public final class App extends JFrame implements BrushControl,
         return customTerrainPanel;
     }
     
-    private JPanel createBrushPanel() {
+    public JPanel createBrushPanel() {
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new GridBagLayout());
         // Use WrapLayout
@@ -4504,7 +4398,7 @@ public final class App extends JFrame implements BrushControl,
 //        }
 //    }
 
-    private JToolBar createToolBar() {
+    public JToolBar createToolBar() {
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false); // Modern apps rarely use floatable toolbars
         toolBar.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -6682,7 +6576,7 @@ public final class App extends JFrame implements BrushControl,
     private int backgroundZoom;
     private Operation activeOperation;
     private File lastSelectedFile;
-    private JLabel heightLabel, slopeLabel, locationLabel, waterLabel, materialLabel, radiusLabel, zoomLabel, biomeLabel, levelLabel, brushRotationLabel;
+    public JLabel heightLabel, slopeLabel, locationLabel, waterLabel, materialLabel, radiusLabel, zoomLabel, biomeLabel, levelLabel, brushRotationLabel;
     private int radius = 50;
     private Brush brush = SymmetricBrush.PLATEAU_CIRCLE, toolBrush = SymmetricBrush.COSINE_CIRCLE;
     private boolean programmaticChange;
