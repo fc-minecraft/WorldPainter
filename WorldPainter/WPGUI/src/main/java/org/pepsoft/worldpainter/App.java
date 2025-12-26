@@ -170,6 +170,7 @@ public final class App extends JFrame implements BrushControl,
         };
         defaultColourScheme = colourSchemes[0];
         Configuration config = Configuration.getInstance();
+        ThemeManager.initTheme(config);
         darkMode = (! "true".equalsIgnoreCase(System.getProperty("org.pepsoft.worldpainter.safeMode"))) && (config.getLookAndFeel() == DARK_METAL);
         final String customColourSchemeLocation = System.getProperty("org.pepsoft.worldpainter.colourSchemeFile");
         if (customColourSchemeLocation != null) {
@@ -1125,9 +1126,9 @@ public final class App extends JFrame implements BrushControl,
             // biomes panel
             if (paintId.startsWith("Layer/Biome/")) {
                 biomesPanel.selectBiome(Integer.parseInt(paintId.substring(12)));
-                if (! biomesPanelFrame.isShowing()) {
-                    dockingManager.showFrame("biomes");
-                }
+                //if (! biomesPanelFrame.isShowing()) {
+                //    dockingManager.showFrame("biomes");
+                //}
                 return;
             }
         }
@@ -2701,18 +2702,15 @@ public final class App extends JFrame implements BrushControl,
 
         scrollController.install();
 
-        dockingManager.addFrame(new DockableFrameBuilder(createToolPanel(), strings.getString("dock.tools"), DOCK_SIDE_WEST, 1).build());
+        sidePanel = new JTabbedPane(JTabbedPane.LEFT);
+        sidePanel.addTab(strings.getString("dock.tools"), createToolPanel());
+        sidePanel.addTab(strings.getString("dock.tool.settings"), createToolSettingsPanel());
+        sidePanel.addTab(strings.getString("dock.layers"), createLayerPanel());
+        sidePanel.addTab(strings.getString("dock.terrain"), createTerrainPanel());
+        sidePanel.addTab(strings.getString("dock.biomes"), createBiomesPanelContainer());
+        sidePanel.addTab(strings.getString("dock.annotations"), createAnnotationsPanel());
 
-        dockingManager.addFrame(new DockableFrameBuilder(createToolSettingsPanel(), strings.getString("dock.tool.settings"), DOCK_SIDE_WEST, 2).expand().scrollable().build());
-
-        dockingManager.addFrame(new DockableFrameBuilder(createLayerPanel(), strings.getString("dock.layers"), DOCK_SIDE_WEST, 3).build());
-
-        dockingManager.addFrame(new DockableFrameBuilder(createTerrainPanel(), strings.getString("dock.terrain"), DOCK_SIDE_WEST, 3).build());
-
-        biomesPanelFrame = new DockableFrameBuilder(createBiomesPanelContainer(), strings.getString("dock.biomes"), DOCK_SIDE_WEST, 3).scrollable().build();
-        dockingManager.addFrame(biomesPanelFrame);
-
-        dockingManager.addFrame(new DockableFrameBuilder(createAnnotationsPanel(), strings.getString("dock.annotations"), DOCK_SIDE_WEST, 3).build());
+        dockingManager.addFrame(new DockableFrameBuilder(sidePanel, "Palette", DOCK_SIDE_WEST, 1).expand().build());
 
         dockingManager.addFrame(new DockableFrameBuilder(createBrushPanel(), strings.getString("dock.brushes"), DOCK_SIDE_EAST, 1).build());
 
@@ -4167,7 +4165,7 @@ public final class App extends JFrame implements BrushControl,
         
         menu.addSeparator();
 
-        JMenu workspaceLayoutMenu = new JMenu("Workspace layout");
+        JMenu workspaceLayoutMenu = new JMenu(strings.getString("menu.view.workspace.layout"));
 
         menuItem = new JMenuItem(ACTION_RESET_DOCKS);
         menuItem.setMnemonic('r');
@@ -4273,7 +4271,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('p');
         menu.add(menuItem);
 
-        menuItem = new JMenuItem("Open custom materials folder");
+        menuItem = new JMenuItem(strings.getString("menu.tools.open.custom.materials.folder"));
         menuItem.addActionListener(e -> {
             File customMaterialsDir = new File(Configuration.getConfigDir(), "materials");
             if (! customMaterialsDir.exists()) {
@@ -4345,7 +4343,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('b');
         menu.add(menuItem);
 
-        menuItem = new JMenuItem("Run script...");
+        menuItem = new JMenuItem(strings.getString("menu.tools.run.script"));
         menuItem.addActionListener(e -> {
             try {
                 new ScriptRunner(this, world, dimension, undoManagers.values()).setVisible(true);
@@ -4754,9 +4752,8 @@ public final class App extends JFrame implements BrushControl,
     }
     
     private void fixLabelSizes() {
-        locationLabel.setMinimumSize(locationLabel.getSize());
-        locationLabel.setPreferredSize(locationLabel.getSize());
-        locationLabel.setMaximumSize(locationLabel.getSize());
+        locationLabel.setMinimumSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
+        locationLabel.setPreferredSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
         heightLabel.setMinimumSize(heightLabel.getSize());
         heightLabel.setPreferredSize(heightLabel.getSize());
         heightLabel.setMaximumSize(heightLabel.getSize());
@@ -5252,7 +5249,9 @@ public final class App extends JFrame implements BrushControl,
         setEnabled(removeCeilingMenuItem, anchor.invert || (world.isDimensionPresent(new Anchor(anchor.dim, anchor.role, true, 0))));
         final boolean biomesSupported = (! anchor.invert) && platform.capabilities.contains(BIOMES) || platform.capabilities.contains(BIOMES_3D) || platform.capabilities.contains(NAMED_BIOMES);
         setEnabled(Biome.INSTANCE, biomesSupported, "Biomes not supported by format " + platform);
-        setEnabled(biomesPanelFrame, biomesSupported);
+        if (sidePanel != null) {
+            sidePanel.setEnabledAt(4, biomesSupported); // 4 is the index of the biomes tab
+        }
         // TODO deselect biomes panel if it was selected
         if ((anchor.dim == DIM_NORMAL) && (anchor.role != MASTER)) {
             setEnabled(setSpawnPointToggleButton, platform.capabilities.contains(SET_SPAWN_POINT));
@@ -6472,56 +6471,56 @@ public final class App extends JFrame implements BrushControl,
         }
     };
     
-    private final BetterAction ACTION_IMPORT_LAYER = new BetterAction("importLayer", "Import custom layer(s)") {
+    private final BetterAction ACTION_IMPORT_LAYER = new BetterAction("importLayer", strings.getString("action.import.layer")) {
         @Override
         protected void performAction(ActionEvent e) {
             importLayers(null, getLayerFilterForCurrentDimension());
         }
     };
     
-    private final BetterAction ACTION_ROTATE_BRUSH_LEFT = new BetterAction("rotateBrushLeft", "Rotate brush counterclockwise fifteen degrees") {
+    private final BetterAction ACTION_ROTATE_BRUSH_LEFT = new BetterAction("rotateBrushLeft", strings.getString("action.rotate.brush.left")) {
         @Override
         protected void performAction(ActionEvent e) {
             setRotation(brushRotationSlider.getValue() - 15);
         }
     };
     
-    private final BetterAction ACTION_ROTATE_BRUSH_RIGHT = new BetterAction("rotateBrushRight", "Rotate brush clockwise fifteen degrees") {
+    private final BetterAction ACTION_ROTATE_BRUSH_RIGHT = new BetterAction("rotateBrushRight", strings.getString("action.rotate.brush.right")) {
         @Override
         protected void performAction(ActionEvent e) {
             setRotation(brushRotationSlider.getValue() + 15);
         }
     };
     
-    private final BetterAction ACTION_ROTATE_BRUSH_RESET = new BetterAction("rotateBrushReset", "Reset brush rotation to zero degrees") {
+    private final BetterAction ACTION_ROTATE_BRUSH_RESET = new BetterAction("rotateBrushReset", strings.getString("action.rotate.brush.reset")) {
         @Override
         protected void performAction(ActionEvent e) {
             setRotation(0);
         }
     };
 
-    private final BetterAction ACTION_ROTATE_BRUSH_RIGHT_30_DEGREES = new BetterAction("rotateBrushRight30Degrees", "Rotate brush clockwise 30 degrees") {
+    private final BetterAction ACTION_ROTATE_BRUSH_RIGHT_30_DEGREES = new BetterAction("rotateBrushRight30Degrees", strings.getString("action.rotate.brush.right.30")) {
         @Override
         protected void performAction(ActionEvent e) {
             setRotation(brushRotationSlider.getValue() + 30);
         }
     };
 
-    private final BetterAction ACTION_ROTATE_BRUSH_RIGHT_45_DEGREES = new BetterAction("rotateBrushRight45Degrees", "Rotate brush clockwise 45 degrees") {
+    private final BetterAction ACTION_ROTATE_BRUSH_RIGHT_45_DEGREES = new BetterAction("rotateBrushRight45Degrees", strings.getString("action.rotate.brush.right.45")) {
         @Override
         protected void performAction(ActionEvent e) {
             setRotation(brushRotationSlider.getValue() + 45);
         }
     };
     
-    private final BetterAction ACTION_ROTATE_BRUSH_RIGHT_90_DEGREES = new BetterAction("rotateBrushRight90Degrees", "Rotate brush clockwise 90 degrees") {
+    private final BetterAction ACTION_ROTATE_BRUSH_RIGHT_90_DEGREES = new BetterAction("rotateBrushRight90Degrees", strings.getString("action.rotate.brush.right.90")) {
         @Override
         protected void performAction(ActionEvent e) {
             setRotation(brushRotationSlider.getValue() + 90);
         }
     };
     
-    private final BetterAction ACTION_RESET_DOCKS = new BetterAction("resetDockLayout", "Reset current and default") {
+    private final BetterAction ACTION_RESET_DOCKS = new BetterAction("resetDockLayout", strings.getString("menu.view.workspace.layout.reset")) {
         @Override
         protected void performAction(ActionEvent e) {
             DesktopUtils.beep();
@@ -6534,7 +6533,7 @@ public final class App extends JFrame implements BrushControl,
         }
     };
 
-    private final BetterAction ACTION_RESET_ALL_DOCKS = new BetterAction("resetAllDockLayout", "Reset current, default and all saved worlds") {
+    private final BetterAction ACTION_RESET_ALL_DOCKS = new BetterAction("resetAllDockLayout", strings.getString("menu.view.workspace.layout.reset.all")) {
         @Override
         protected void performAction(ActionEvent e) {
             DesktopUtils.beep();
@@ -6548,7 +6547,7 @@ public final class App extends JFrame implements BrushControl,
         }
     };
 
-    private final BetterAction ACTION_LOAD_LAYOUT = new BetterAction("loadDockLayout", "Load workspace layout") {
+    private final BetterAction ACTION_LOAD_LAYOUT = new BetterAction("loadDockLayout", strings.getString("menu.view.workspace.layout.load")) {
         @Override
         protected void performAction(ActionEvent e) {
             Configuration config = Configuration.getInstance();
@@ -6558,7 +6557,7 @@ public final class App extends JFrame implements BrushControl,
         }
     };
 
-    private final BetterAction ACTION_SAVE_LAYOUT = new BetterAction("resetDocks", "Save workspace layout") {
+    private final BetterAction ACTION_SAVE_LAYOUT = new BetterAction("resetDocks", strings.getString("menu.view.workspace.layout.save")) {
         @Override
         protected void performAction(ActionEvent e) {
             Configuration config = Configuration.getInstance();
@@ -6568,7 +6567,7 @@ public final class App extends JFrame implements BrushControl,
         }
     };
 
-    private final BetterAction ACTION_SWITCH_TO_FROM_CEILING = new BetterAction("switchCeiling", "Switch to/from Ceiling") {
+    private final BetterAction ACTION_SWITCH_TO_FROM_CEILING = new BetterAction("switchCeiling", strings.getString("action.switch.to.from.ceiling")) {
         {
             setAcceleratorKey(getKeyStroke(VK_C, PLATFORM_COMMAND_MASK));
         }
@@ -6587,7 +6586,7 @@ public final class App extends JFrame implements BrushControl,
         }
     };
 
-    private final BetterAction ACTION_SWITCH_TO_FROM_MASTER = new BetterAction("switchMaster", "Switch to/from Master") {
+    private final BetterAction ACTION_SWITCH_TO_FROM_MASTER = new BetterAction("switchMaster", strings.getString("action.switch.to.from.master")) {
         {
             setAcceleratorKey(getKeyStroke(VK_M, PLATFORM_COMMAND_MASK));
         }
@@ -6608,7 +6607,7 @@ public final class App extends JFrame implements BrushControl,
 
     private final BetterAction ACTION_SHOW_CUSTOM_TERRAIN_POPUP = new BetterAction("showCustomTerrainMenu", null, loadScaledIcon("plus")) {
         {
-            setShortDescription("Add a new Custom Terrain");
+            setShortDescription(strings.getString("action.add.custom.terrain"));
         }
 
         @Override
@@ -6621,9 +6620,9 @@ public final class App extends JFrame implements BrushControl,
         }
     };
 
-    private final BetterAction ACTION_SHOW_HELP_PICKER = new BetterAction("showHelpPicker", "Help for control", loadScaledIcon("information")) {
+    private final BetterAction ACTION_SHOW_HELP_PICKER = new BetterAction("showHelpPicker", strings.getString("menu.help.help.for.control"), loadScaledIcon("information")) {
         {
-            setShortDescription("Show help information for a specific control");
+            setShortDescription(strings.getString("action.show.help"));
         }
 
         @Override
@@ -6632,7 +6631,7 @@ public final class App extends JFrame implements BrushControl,
         }
     };
 
-    private final BetterAction ACTION_ESCAPE = new BetterAction("exitDimension", "Leave the current operation") {
+    private final BetterAction ACTION_ESCAPE = new BetterAction("exitDimension", strings.getString("action.exit.dimension")) {
         {
             setAcceleratorKey(getKeyStroke(VK_ESCAPE, 0));
         }
@@ -6698,7 +6697,8 @@ public final class App extends JFrame implements BrushControl,
     private ThreeDeeFrame threeDeeFrame;
     private BiomesViewerFrame biomesViewerFrame;
     private BiomesPanel biomesPanel;
-    private DockableFrame biomesPanelFrame;
+    private JTabbedPane sidePanel;
+    //private DockableFrame biomesPanelFrame;
     private Filter filter, toolFilter;
     private boolean hideAbout, hidePreferences, hideExit;
     private PaintUpdater paintUpdater = () -> {

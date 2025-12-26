@@ -57,6 +57,17 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
         // Eliminate thousands separators to make spinners smaller:
         spinnerAbove.setEditor(new NumberEditor(spinnerAbove, "0"));
         spinnerBelow.setEditor(new NumberEditor(spinnerBelow, "0"));
+
+        checkBoxAbove.setText(strings.getString("brush.settings.at.or.above"));
+        checkBoxBelow.setText(strings.getString("brush.settings.at.or.below"));
+        checkBoxReplace.setText(strings.getString("brush.settings.only.on"));
+        checkBoxFeather.setText(strings.getString("brush.settings.feather"));
+        checkBoxExceptOn.setText(strings.getString("brush.settings.except.on"));
+        checkBoxAboveSlope.setText(strings.getString("brush.settings.slope.above"));
+        checkBoxBelowSlope.setText(strings.getString("brush.settings.slope.below"));
+        jLabel1.setText(strings.getString("brush.settings.degrees"));
+        checkBoxInSelection.setText(strings.getString("brush.settings.inside.selection"));
+        checkBoxOutsideSelection.setText(strings.getString("brush.settings.outside.selection"));
     }
 
     public ColourScheme getColourScheme() {
@@ -1131,6 +1142,7 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
     private static final Icon ICON_EYEDROPPER = loadScaledIcon("org/pepsoft/worldpainter/icons/eyedropper.png");
     private static final Icon ICON_PLUS = loadScaledIcon("org/pepsoft/worldpainter/icons/plus.png");
     private static final Logger logger = LoggerFactory.getLogger(BrushOptions.class);
+    private static final ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
     private static final long serialVersionUID = 1L;
     
     public interface Listener {

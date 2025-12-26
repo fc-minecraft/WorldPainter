@@ -629,7 +629,12 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
 
         jLabel6.setText(strings.getString("dialog.export.label.difficulty"));
 
-        comboBoxDifficulty.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Peaceful", "Easy", "Normal", "Hard" }));
+        comboBoxDifficulty.setModel(new javax.swing.DefaultComboBoxModel(new String[] {
+            strings.getString("dialog.export.difficulty.peaceful"),
+            strings.getString("dialog.export.difficulty.easy"),
+            strings.getString("dialog.export.difficulty.normal"),
+            strings.getString("dialog.export.difficulty.hard")
+        }));
 
         checkBoxMapFeatures.setSelected(true);
         checkBoxMapFeatures.setText(" ");
