@@ -2,6 +2,7 @@ package org.pepsoft.worldpainter.theme;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.extras.FlatInspector;
 import org.pepsoft.util.GUIUtils;
 import org.pepsoft.util.IconUtils;
 import org.pepsoft.worldpainter.Configuration;
@@ -28,27 +29,27 @@ public class ThemeManager {
 
     // --- Font Settings ---
     public static final String FONT_NAME = Font.SANS_SERIF;
-    public static final int FONT_SIZE_BASE = 20; // Increased for better readability
-    public static final int FONT_SIZE_HEADER = 24;
+    public static final int FONT_SIZE_BASE = 14; // Standard desktop readable size
+    public static final int FONT_SIZE_HEADER = 18;
 
     // --- Layout Metrics ---
-    public static final int BUTTON_ARC = 12; // Modern rounded corners (not capsule)
-    public static final int COMPONENT_ARC = 12; // Consistent rounded corners
-    public static final int SCROLLBAR_WIDTH = 20; // Slightly narrower but still accessible
-    public static final int ROW_HEIGHT = 36; // Compact but touch-friendly
-    public static final int TAB_HEIGHT = 40; // Compact tabs
-    public static final int GAP_SMALL = 8;
-    public static final int GAP_MEDIUM = 16;
-    public static final int GAP_LARGE = 24;
+    public static final int BUTTON_ARC = 8; // Modern rounded corners
+    public static final int COMPONENT_ARC = 8; // Consistent rounded corners
+    public static final int SCROLLBAR_WIDTH = 12; // Standard width
+    public static final int ROW_HEIGHT = 24; // Standard list height
+    public static final int TAB_HEIGHT = 28; // Standard tab height
+    public static final int GAP_SMALL = 4;
+    public static final int GAP_MEDIUM = 8;
+    public static final int GAP_LARGE = 12;
 
-    public static final Insets BUTTON_MARGINS = new Insets(4, 8, 4, 8); // Compact buttons
-    public static final Insets DIALOG_PADDING = new Insets(24, 24, 24, 24);
+    public static final Insets BUTTON_MARGINS = new Insets(2, 6, 2, 6);
+    public static final Insets DIALOG_PADDING = new Insets(12, 12, 12, 12);
 
     // --- Icon Sizes ---
-    public static final int ICON_SIZE_SMALL = 32;
-    public static final int ICON_SIZE_MEDIUM = 48;
-    public static final int ICON_SIZE_LARGE = 64;
-    public static final int ICON_SIZE_EXTRA_LARGE = 96;
+    public static final int ICON_SIZE_SMALL = 16;
+    public static final int ICON_SIZE_MEDIUM = 24;
+    public static final int ICON_SIZE_LARGE = 32;
+    public static final int ICON_SIZE_EXTRA_LARGE = 48;
 
     /**
      * Initializes the application theme based on configuration.
@@ -91,6 +92,10 @@ public class ThemeManager {
             if (GUIUtils.getUIScale() != 1.0f) {
                 GUIUtils.scaleLookAndFeel(GUIUtils.getUIScale());
             }
+
+            // Enable FlatInspector with Ctrl+Shift+Alt+X
+            FlatInspector.install("ctrl shift alt X");
+
         } catch (Exception e) {
             logger.warn("Could not install selected look and feel", e);
         }

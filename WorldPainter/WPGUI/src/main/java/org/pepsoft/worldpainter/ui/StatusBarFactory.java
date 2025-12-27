@@ -50,8 +50,18 @@ public class StatusBarFactory {
 
         statusBar.add(createSeparator(), c);
 
+        app.waterLabel = new JLabel(strings.getString("info.water.level"));
+        statusBar.add(app.waterLabel, c);
+
+        statusBar.add(createSeparator(), c);
+
         app.biomeLabel = new JLabel(strings.getString("info.biome"));
         statusBar.add(app.biomeLabel, c);
+
+        statusBar.add(createSeparator(), c);
+
+        app.radiusLabel = new JLabel(strings.getString("radius.0"));
+        statusBar.add(app.radiusLabel, c);
 
         statusBar.add(createSeparator(), c);
 

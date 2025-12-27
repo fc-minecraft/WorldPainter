@@ -544,7 +544,7 @@ public final class App extends JFrame implements BrushControl,
             }
 
             view.setDimension(dimension, false);
-            outsideDimensionLabel = "Minecraft Generated";
+            outsideDimensionLabel = strings.getString("dimension.generated.minecraft");
             if (anchor.equals(NORMAL_DETAIL)) {
                 backgroundDimension = world.getDimension(new Anchor(DIM_NORMAL, MASTER, false, 0));
                 showBackgroundStatus = backgroundDimension != null;
@@ -554,7 +554,7 @@ public final class App extends JFrame implements BrushControl,
                 backgroundDimension = world.getDimension(new Anchor(anchor.dim, DETAIL, anchor.invert, 0));
                 showBackgroundStatus = false;
                 backgroundZoom = 0;
-                outsideDimensionLabel = (anchor.role == CAVE_FLOOR) ? "Outside Cave/Tunnel" : "Outside Floating Dimension";
+                outsideDimensionLabel = (anchor.role == CAVE_FLOOR) ? strings.getString("dimension.outside.cave") : strings.getString("dimension.outside.floating");
                 view.setBackgroundDimension(backgroundDimension, backgroundZoom, FADE_TO_TWENTYFIVE_PERCENT);
             } else {
                 backgroundDimension = null;
@@ -768,7 +768,7 @@ public final class App extends JFrame implements BrushControl,
             setTextIfDifferent(slopeLabel, " ");
             setTextIfDifferent(waterLabel, " ");
             if (dimension.isBorderTile(x >> TILE_SIZE_BITS, y >> TILE_SIZE_BITS)) {
-                setTextIfDifferent(materialLabel, "Border");
+                setTextIfDifferent(materialLabel, strings.getString("info.border"));
             } else {
                 setTextIfDifferent(materialLabel, outsideDimensionLabel);
             }
@@ -786,7 +786,7 @@ public final class App extends JFrame implements BrushControl,
         }
         final int height = tile.getIntHeight(xInTile, yInTile);
         setTextIfDifferent(heightLabel, MessageFormat.format(strings.getString("height.0.of.1"), height, (height >= 0) ? dimension.getMaxHeight() - 1 : dimension.getMinHeight()));
-        setTextIfDifferent(slopeLabel, MessageFormat.format("Slope: {0}°", (int) round(Math.atan(dimension.getSlope(x, y)) * 180 / Math.PI)));
+        setTextIfDifferent(slopeLabel, MessageFormat.format(strings.getString("info.slope.format"), (int) round(Math.atan(dimension.getSlope(x, y)) * 180 / Math.PI)));
         if ((activeOperation instanceof PaintOperation) && (paint instanceof LayerPaint)) {
             final Layer layer = ((LayerPaint) paint).getLayer();
             final Layer.DataSize dataSize = layer.getDataSize();
@@ -832,7 +832,7 @@ public final class App extends JFrame implements BrushControl,
             if (biome == 255) {
                 biome = dimension.getAutoBiome(x, y);
                 if (biome != -1) {
-                    setTextIfDifferent(biomeLabel, "Auto biome: " + biomeHelper.getBiomeName(biome));
+                    setTextIfDifferent(biomeLabel, strings.getString("info.autobiome") + biomeHelper.getBiomeName(biome));
                 }
             } else if (biome != -1) {
                 setTextIfDifferent(biomeLabel, MessageFormat.format(strings.getString("biome.0"), biomeHelper.getBiomeName(biome)));
@@ -4944,8 +4944,8 @@ public final class App extends JFrame implements BrushControl,
         final JToggleButton button = new JToggleButton();
         button.putClientProperty(KEY_PAINT_ID, createTerrainPaintId(terrain));
         button.setMargin(App.SMALLER_BUTTON_INSETS);
-        // Use 48px icons for larger, clearer block textures as requested
-        button.setIcon(new ImageIcon(terrain.getScaledIcon(48, selectedColourScheme)));
+        // Use standard large icons (32px)
+        button.setIcon(new ImageIcon(terrain.getScaledIcon(ThemeManager.ICON_SIZE_LARGE, selectedColourScheme)));
         button.setToolTipText(terrain.getName() + ": " + terrain.getDescription());
         button.addItemListener(event -> {
             if (event.getStateChange() == ItemEvent.SELECTED) {
@@ -5067,8 +5067,8 @@ public final class App extends JFrame implements BrushControl,
     }
 
     private JComponent createBrushButton(final Brush brush) {
-        // Increase brush thumbnail size to 64px for better visibility
-        final JToggleButton button = new LazyLoadingIconToggleButton((int) (64 * getUIScale()), () -> setBrushThumbnail(brush));
+        // Use standard large icons (32px)
+        final JToggleButton button = new LazyLoadingIconToggleButton((int) (ThemeManager.ICON_SIZE_LARGE * getUIScale()), () -> setBrushThumbnail(brush));
         button.setMargin(new Insets(2, 2, 2, 2));
         button.setToolTipText(brush.getName());
         button.addItemListener(e -> {
@@ -5102,7 +5102,7 @@ public final class App extends JFrame implements BrushControl,
     }
 
     private Icon setBrushThumbnail(Brush brush) {
-        final Icon thumbnail = createBrushThumbnail(brush.clone(), round(64 * getUIScale()));
+        final Icon thumbnail = createBrushThumbnail(brush.clone(), round(ThemeManager.ICON_SIZE_LARGE * getUIScale()));
         final JToggleButton button = brushButtons.get(brush);
         button.putClientProperty(KEY_THUMBNAIL, thumbnail);
         updateBrushRotation(brush, button);
