@@ -2689,7 +2689,6 @@ public final class App extends JFrame implements BrushControl,
             dockingManager.setOutlineMode(DockingManager.MIX_OUTLINE_MODE);
         }
         dockingManager.setGroupAllowedOnSidePane(false);
-        dockingManager.setTabbedPaneCustomizer(tabbedPane -> tabbedPane.setTabPlacement(JTabbedPane.LEFT));
         // Stop JIDE from swallowing the Esc key
         dockingManager.getMainContainer().unregisterKeyboardAction(getKeyStroke(VK_ESCAPE, 0));
         Workspace workspace = dockingManager.getWorkspace();
@@ -2923,8 +2922,7 @@ public final class App extends JFrame implements BrushControl,
 
 
     public JPanel createToolPanel() {
-        JPanel toolPanel = new JPanel();
-        toolPanel.setLayout(new GridLayout(0, 4));
+        JPanel toolPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
         // TODO: use function keys as accelerators?
         toolPanel.add(createButtonForOperation(new SprayPaint(view), 'r'));
         toolPanel.add(createButtonForOperation(new Pencil(view), 'p'));
@@ -6620,18 +6618,8 @@ public final class App extends JFrame implements BrushControl,
     public static final String KEY_THUMBNAIL = "org.pepsoft.worldpainter.thumbnail";
     public static final String KEY_PAINT_ID = "org.pepsoft.worldpainter.paint.id";
 
-    public static final Insets BUTTON_INSETS = new Insets(6, 10, 6, 10) {
-        @Override
-        public void set(int top, int left, int bottom, int right) {
-            throw new UnsupportedOperationException();
-        }
-    };
-    public static final Insets SMALLER_BUTTON_INSETS = new Insets(4, 8, 4, 8) {
-        @Override
-        public void set(int top, int left, int bottom, int right) {
-            throw new UnsupportedOperationException();
-        }
-    };
+    public static final Insets BUTTON_INSETS = new Insets(2, 6, 2, 6);
+    public static final Insets SMALLER_BUTTON_INSETS = new Insets(2, 4, 2, 4);
 
     public static final NumberFormat INT_NUMBER_FORMAT = NumberFormat.getIntegerInstance();
     public static final NumberFormat FLOAT_NUMBER_FORMAT = NumberFormat.getNumberInstance();
