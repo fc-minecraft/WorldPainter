@@ -2705,7 +2705,7 @@ public final class App extends JFrame implements BrushControl,
 
         sidePanel = PanelFactory.createPalette(this);
 
-        dockingManager.addFrame(new DockableFrameBuilder(sidePanel, "Palette", DOCK_SIDE_WEST, 1).expand().build());
+        dockingManager.addFrame(new DockableFrameBuilder(sidePanel, strings.getString("dock.palette"), DOCK_SIDE_WEST, 1).build());
 
         dockingManager.addFrame(new DockableFrameBuilder(PanelFactory.createBrushPanel(this), strings.getString("dock.brushes"), DOCK_SIDE_EAST, 1).build());
 

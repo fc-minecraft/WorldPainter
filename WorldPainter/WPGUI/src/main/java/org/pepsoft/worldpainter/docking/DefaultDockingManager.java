@@ -33,6 +33,7 @@ public class DefaultDockingManager implements DockingManager {
 
         rootSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftTabs, rightSplit);
         rootSplit.setResizeWeight(0.0); // Give initial space to left tabs
+        rootSplit.setDividerLocation(360); // Set reasonable default width for palette
 
         container.add(rootSplit, BorderLayout.CENTER);
     }
