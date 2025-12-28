@@ -2933,6 +2933,11 @@ public final class App extends JFrame implements BrushControl,
         toolPanel.add(createButtonForOperation(new Flood(view, true)));
         toolPanel.add(createButtonForOperation(new Sponge(view)));
         eyedropperToggleButton = new JToggleButton(loadScaledIcon("eyedropper"));
+        // Force size for eyedropper
+        java.awt.Dimension size = new java.awt.Dimension((int) (ThemeManager.ICON_SIZE_LARGE * 1.5), (int) (ThemeManager.ICON_SIZE_LARGE * 1.5));
+        eyedropperToggleButton.setPreferredSize(size);
+        eyedropperToggleButton.setMinimumSize(size);
+        eyedropperToggleButton.setMaximumSize(size);
         eyedropperToggleButton.setMnemonic('y');
         eyedropperToggleButton.setMargin(App.BUTTON_INSETS);
         eyedropperToggleButton.addActionListener(e -> {
@@ -3046,12 +3051,12 @@ public final class App extends JFrame implements BrushControl,
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(1, 1, 1, 1);
 
-        JLabel label = new JLabel("<html>S<br>h<br>o<br>w</html>");
+        JLabel label = new JLabel(strings.getString("layer.column.show"));
         label.setVerticalAlignment(SwingConstants.BOTTOM);
         label.setMinimumSize(label.getPreferredSize());
         constraints.anchor = GridBagConstraints.SOUTH;
         layerPanel.add(label, constraints);
-        label = new JLabel("<html>S<br>o<br>l<br>o</html>");
+        label = new JLabel(strings.getString("layer.column.solo"));
         label.setVerticalAlignment(SwingConstants.BOTTOM);
         label.setMinimumSize(label.getPreferredSize());
         layerPanel.add(label, constraints);
@@ -3122,15 +3127,15 @@ public final class App extends JFrame implements BrushControl,
                         break;
                     case HIDE_TERRAIN:
                         setIcon(ICON_NO_TERRAIN);
-                        setText("Hide Terrain");
+                        setText(strings.getString("terrain.mode.hide"));
                         break;
                     case DEFAULT_COLOUR_RAMP:
                         setIcon(defaultColourRampIcon);
-                        setText(null);
+                        setText(strings.getString("terrain.mode.default_colour"));
                         break;
                     case DEFAULT_GREYSCALE_RAMP:
                         setIcon(defaultGreyscaleRampIcon);
-                        setText(null);
+                        setText(strings.getString("terrain.mode.default_greyscale"));
                         break;
                 }
                 return this;
@@ -3192,9 +3197,9 @@ public final class App extends JFrame implements BrushControl,
         Configuration config = Configuration.getInstance();
         constraints.anchor = GridBagConstraints.FIRST_LINE_START;
         constraints.weightx = 0.0;
-        JCheckBox checkBox = new JCheckBox("Show:");
+        JCheckBox checkBox = new JCheckBox(strings.getString("option.show"));
         checkBox.setHorizontalTextPosition(SwingConstants.LEADING);
-        checkBox.setToolTipText("Uncheck to hide biomes from view (it will still be exported)");
+        checkBox.setToolTipText(strings.getString("tooltip.show.biomes"));
         checkBox.addActionListener(e -> {
             if (checkBox.isSelected()) {
                 hiddenLayers.remove(Biome.INSTANCE);
@@ -3209,9 +3214,9 @@ public final class App extends JFrame implements BrushControl,
             biomesPanelContainer.add(checkBox, constraints);
         }
 
-        JCheckBox soloCheckBox = new JCheckBox("Solo:");
+        JCheckBox soloCheckBox = new JCheckBox(strings.getString("option.solo"));
         soloCheckBox.setHorizontalTextPosition(SwingConstants.LEADING);
-        soloCheckBox.setToolTipText("<html>Check to show <em>only</em> the biomes (the other layers are still exported)</html>");
+        soloCheckBox.setToolTipText(strings.getString("tooltip.solo.biomes"));
         soloCheckBox.addActionListener(new SoloCheckboxHandler(soloCheckBox, Biome.INSTANCE));
         layerSoloCheckBoxes.put(Biome.INSTANCE, soloCheckBox);
         if (! config.isEasyMode()) {
@@ -3246,10 +3251,10 @@ public final class App extends JFrame implements BrushControl,
         Configuration config = Configuration.getInstance();
         constraints.anchor = GridBagConstraints.FIRST_LINE_START;
         constraints.weightx = 0.0;
-        JCheckBox checkBox = new JCheckBox("Show:");
+        JCheckBox checkBox = new JCheckBox(strings.getString("option.show"));
         checkBox.setHorizontalTextPosition(SwingConstants.LEADING);
         checkBox.setSelected(true);
-        checkBox.setToolTipText("Uncheck to hide annotations from view");
+        checkBox.setToolTipText(strings.getString("tooltip.show.annotations"));
         checkBox.addActionListener(e -> {
             if (checkBox.isSelected()) {
                 hiddenLayers.remove(Annotations.INSTANCE);
@@ -3264,9 +3269,9 @@ public final class App extends JFrame implements BrushControl,
             layerPanel.add(checkBox, constraints);
         }
 
-        JCheckBox soloCheckBox = new JCheckBox("Solo:");
+        JCheckBox soloCheckBox = new JCheckBox(strings.getString("option.solo"));
         soloCheckBox.setHorizontalTextPosition(SwingConstants.LEADING);
-        soloCheckBox.setToolTipText("<html>Check to show <em>only</em> the annotations (the other layers are still exported)</html>");
+        soloCheckBox.setToolTipText(strings.getString("tooltip.solo.annotations"));
         soloCheckBox.addActionListener(new SoloCheckboxHandler(soloCheckBox, Annotations.INSTANCE));
         layerSoloCheckBoxes.put(Annotations.INSTANCE, soloCheckBox);
         if (! config.isEasyMode()) {
@@ -3328,13 +3333,21 @@ public final class App extends JFrame implements BrushControl,
         constraints.weightx = 0.0;
         constraints.gridwidth = GridBagConstraints.REMAINDER;
         if (! config.isEasyMode()) {
-            final JCheckBox checkBoxSoloTerrain = new RemoteJCheckBox(terrainSoloCheckBox, "Solo:");
+            final JCheckBox checkBoxSoloTerrain = new RemoteJCheckBox(terrainSoloCheckBox, strings.getString("option.solo"));
             checkBoxSoloTerrain.setHorizontalTextPosition(SwingConstants.LEADING);
-            checkBoxSoloTerrain.setToolTipText("<html>Check to show <em>only</em> the biomes (the other layers are still exported)</html>");
+            checkBoxSoloTerrain.setToolTipText(strings.getString("tooltip.solo.terrain"));
             terrainPanel.add(checkBoxSoloTerrain, constraints);
         }
 
-        // Use WrapLayout for better wrapping
+        // Use a scrollable panel with WrapLayout
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.NORTHWEST;
+
         JPanel buttonPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
         // Surface
         buttonPanel.add(createTerrainButton(GRASS));
@@ -3430,10 +3443,31 @@ public final class App extends JFrame implements BrushControl,
         buttonPanel.add(Box.createGlue());
 
         // Custom terrains
+        customTerrainPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
+        customTerrainPanel.setOpaque(false);
+        // Add a button for the "add custom terrain" action
         JButton addCustomTerrainButton = new JButton(ACTION_SHOW_CUSTOM_TERRAIN_POPUP);
-        addCustomTerrainButton.setMargin(App.BUTTON_INSETS);
-        buttonPanel.add(addCustomTerrainButton);
-        terrainPanel.add(buttonPanel, constraints);
+        addCustomTerrainButton.setHideActionText(true);
+        addCustomTerrainButton.setMargin(SMALLER_BUTTON_INSETS);
+        // Force size for add button too
+        java.awt.Dimension size = new java.awt.Dimension((int) (ThemeManager.ICON_SIZE_LARGE * 1.5), (int) (ThemeManager.ICON_SIZE_LARGE * 1.5));
+        addCustomTerrainButton.setPreferredSize(size);
+        addCustomTerrainButton.setMinimumSize(size);
+        addCustomTerrainButton.setMaximumSize(size);
+        customTerrainPanel.add(addCustomTerrainButton);
+
+        loadCustomTerrains();
+
+        contentPanel.add(buttonPanel, c);
+
+        c.gridy = 1;
+        c.weighty = 1.0;
+        contentPanel.add(customTerrainPanel, c);
+
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.fill = GridBagConstraints.BOTH;
+        terrainPanel.add(contentPanel, constraints);
 
         return terrainPanel;
     }
@@ -3441,9 +3475,15 @@ public final class App extends JFrame implements BrushControl,
     private JPanel createCustomTerrainPanel() {
         // Use WrapLayout
         customTerrainPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
+        customTerrainPanel.setOpaque(false);
 
         JButton addCustomTerrainButton = new JButton(ACTION_SHOW_CUSTOM_TERRAIN_POPUP);
-        addCustomTerrainButton.setMargin(App.BUTTON_INSETS);
+        addCustomTerrainButton.setHideActionText(true);
+        addCustomTerrainButton.setMargin(SMALLER_BUTTON_INSETS);
+        java.awt.Dimension size = new java.awt.Dimension((int) (ThemeManager.ICON_SIZE_LARGE * 1.5), (int) (ThemeManager.ICON_SIZE_LARGE * 1.5));
+        addCustomTerrainButton.setPreferredSize(size);
+        addCustomTerrainButton.setMinimumSize(size);
+        addCustomTerrainButton.setMaximumSize(size);
         customTerrainPanel.add(addCustomTerrainButton);
 
         return customTerrainPanel;
@@ -3715,14 +3755,14 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('a');
         menu.add(menuItem);
 
+        // Always add Export to Minecraft to the main File menu
         menuItem = new JMenuItem(ACTION_EXPORT_WORLD);
         menuItem.setMnemonic('m');
-        if (config.isEasyMode()) {
-            menu.add(menuItem);
-        } else {
+        menu.add(menuItem);
+
+        if (! config.isEasyMode()) {
             JMenu exportMenu = new JMenu(strings.getString("export"));
             exportMenu.setMnemonic('e');
-            exportMenu.add(menuItem);
 
             menuItem = new JMenuItem(strings.getString("export.as.image.file") + "...");
             menuItem.addActionListener(event -> exportImage());
@@ -4460,7 +4500,7 @@ public final class App extends JFrame implements BrushControl,
         button.setMargin(new Insets(4, 4, 4, 4));
         button.setFocusable(false);
         // Force a consistent square-ish size for standard toolbar buttons
-        java.awt.Dimension dim = new java.awt.Dimension(ThemeManager.ICON_SIZE_MEDIUM + 12, ThemeManager.ICON_SIZE_MEDIUM + 12);
+        java.awt.Dimension dim = new java.awt.Dimension((int) (ThemeManager.ICON_SIZE_MEDIUM * 1.25), (int) (ThemeManager.ICON_SIZE_MEDIUM * 1.25));
         button.setPreferredSize(dim);
         button.setMinimumSize(dim);
         button.setMaximumSize(dim);
@@ -4646,31 +4686,30 @@ public final class App extends JFrame implements BrushControl,
     }
     
     private void fixLabelSizes() {
-        //locationLabel.setMinimumSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
-        //locationLabel.setPreferredSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
+        // Clear fixed sizes to allow labels to expand as needed for localization
         locationLabel.setMinimumSize(null);
         locationLabel.setPreferredSize(null);
-        heightLabel.setMinimumSize(heightLabel.getSize());
-        heightLabel.setPreferredSize(heightLabel.getSize());
-        heightLabel.setMaximumSize(heightLabel.getSize());
-        slopeLabel.setMinimumSize(slopeLabel.getSize());
-        slopeLabel.setPreferredSize(slopeLabel.getSize());
-        slopeLabel.setMaximumSize(slopeLabel.getSize());
-        materialLabel.setMinimumSize(materialLabel.getSize());
-        materialLabel.setPreferredSize(materialLabel.getSize());
-        materialLabel.setMaximumSize(materialLabel.getSize());
-        waterLabel.setMinimumSize(waterLabel.getSize());
-        waterLabel.setPreferredSize(waterLabel.getSize());
-        waterLabel.setMaximumSize(waterLabel.getSize());
-        biomeLabel.setMinimumSize(biomeLabel.getSize());
-        biomeLabel.setPreferredSize(biomeLabel.getSize());
-        biomeLabel.setMaximumSize(biomeLabel.getSize());
-        radiusLabel.setMinimumSize(radiusLabel.getSize());
-        radiusLabel.setPreferredSize(radiusLabel.getSize());
-        radiusLabel.setMaximumSize(radiusLabel.getSize());
-        zoomLabel.setMinimumSize(zoomLabel.getSize());
-        zoomLabel.setPreferredSize(zoomLabel.getSize());
-        zoomLabel.setMaximumSize(zoomLabel.getSize());
+        heightLabel.setMinimumSize(null);
+        heightLabel.setPreferredSize(null);
+        heightLabel.setMaximumSize(null);
+        slopeLabel.setMinimumSize(null);
+        slopeLabel.setPreferredSize(null);
+        slopeLabel.setMaximumSize(null);
+        materialLabel.setMinimumSize(null);
+        materialLabel.setPreferredSize(null);
+        materialLabel.setMaximumSize(null);
+        waterLabel.setMinimumSize(null);
+        waterLabel.setPreferredSize(null);
+        waterLabel.setMaximumSize(null);
+        biomeLabel.setMinimumSize(null);
+        biomeLabel.setPreferredSize(null);
+        biomeLabel.setMaximumSize(null);
+        radiusLabel.setMinimumSize(null);
+        radiusLabel.setPreferredSize(null);
+        radiusLabel.setMaximumSize(null);
+        zoomLabel.setMinimumSize(null);
+        zoomLabel.setPreferredSize(null);
+        zoomLabel.setMaximumSize(null);
 
         locationLabel.setText(strings.getString("location-"));
         heightLabel.setText(" ");
@@ -4696,6 +4735,12 @@ public final class App extends JFrame implements BrushControl,
         if (icon != null) {
             button.setIcon(new ImageIcon(icon));
         }
+        // Force consistent size for tool buttons (approx 1.5x large icon size to match others)
+        java.awt.Dimension size = new java.awt.Dimension((int) (ThemeManager.ICON_SIZE_LARGE * 1.5), (int) (ThemeManager.ICON_SIZE_LARGE * 1.5));
+        button.setPreferredSize(size);
+        button.setMinimumSize(size);
+        button.setMaximumSize(size);
+
         final StringBuilder tooltip = new StringBuilder();
         tooltip.append(operation.getName());
         final String description = operation.getDescription();
@@ -4888,6 +4933,12 @@ public final class App extends JFrame implements BrushControl,
             });
             paintButtonGroup.add(button);
             button.setText(layer.getName());
+            // Ensure consistent height for layer buttons in list
+            java.awt.Dimension size = button.getPreferredSize();
+            size.height = (int) (ThemeManager.ICON_SIZE_MEDIUM * 1.2); // Slightly larger than icon
+            button.setPreferredSize(size);
+            button.setMinimumSize(size);
+
             button.putClientProperty(KEY_HELP_KEY, "Layer/" + layer.getId());
             button.putClientProperty(KEY_PAINT_ID, createLayerPaintId(layer));
             return createLayerRow(layer, true, createSoloCheckbox, button);
@@ -4945,6 +4996,10 @@ public final class App extends JFrame implements BrushControl,
         // Use standard large icons (32px)
         button.setIcon(new ImageIcon(terrain.getScaledIcon(ThemeManager.ICON_SIZE_LARGE, selectedColourScheme)));
         button.setToolTipText(terrain.getName() + ": " + terrain.getDescription());
+        java.awt.Dimension size = new java.awt.Dimension((int) (ThemeManager.ICON_SIZE_LARGE * 1.5), (int) (ThemeManager.ICON_SIZE_LARGE * 1.5));
+        button.setPreferredSize(size);
+        button.setMinimumSize(size);
+        button.setMaximumSize(size);
         button.addItemListener(event -> {
             if (event.getStateChange() == ItemEvent.SELECTED) {
                 if (terrain.isConfigured()) {

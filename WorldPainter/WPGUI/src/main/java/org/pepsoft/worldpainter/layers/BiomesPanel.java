@@ -38,6 +38,8 @@ import static org.pepsoft.worldpainter.painting.PaintFactory.createDiscreteLayer
  * Created by pepijn on 27-05-15.
  */
 public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiomeListener {
+    private static final ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
+
     public BiomesPanel(CustomBiomeManager customBiomeManager, Listener listener, ButtonGroup buttonGroup) {
         this.customBiomeManager = customBiomeManager;
         this.listener = listener;
@@ -157,7 +159,7 @@ public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiom
         JButton addCustomBiomeButton = new JButton(IconUtils.loadScaledIcon("org/pepsoft/worldpainter/icons/plus.png"));
         addCustomBiomeButton.putClientProperty(KEY_ADD_BUTTON, TRUE);
         addCustomBiomeButton.setMargin(App.BUTTON_INSETS);
-        addCustomBiomeButton.setToolTipText("Add a custom biome");
+        addCustomBiomeButton.setToolTipText(strings.getString("biomes.add.tooltip"));
         addCustomBiomeButton.addActionListener(e -> {
             final World2 world = App.getInstance().getWorld();
             if (world == null) {
@@ -167,7 +169,7 @@ public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiom
             final Window parent = SwingUtilities.getWindowAncestor(BiomesPanel.this);
             final int id = customBiomeManager.getNextId();
             if (id == -1) {
-                JOptionPane.showMessageDialog(parent, "Maximum number of custom biomes reached", "Maximum Reached", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(parent, strings.getString("biomes.error.max.message"), strings.getString("biomes.error.max.title"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
             final Platform platform = world.getPlatform();
@@ -212,9 +214,7 @@ public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiom
                     } else {
                         Set<BiomeOption> options = findVariantOptions(biome);
                         if (! options.isEmpty()) {
-                            tooltip.append(" (options: ");
-                            tooltip.append(options.stream().map(this::createOptionName).collect(joining(", ")));
-                            tooltip.append(')');
+                            tooltip.append(java.text.MessageFormat.format(strings.getString("biomes.options"), options.stream().map(this::createOptionName).collect(joining(", "))));
                         }
                     }
                     button.setToolTipText(tooltip.toString());
@@ -261,7 +261,7 @@ public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiom
     private void resetOptions() {
         Set<BiomeOption> availableOptions = findAvailableOptions(selectedBaseBiome);
         optionsPanel.removeAll();
-        optionsPanel.add(new JLabel("Variations:"));
+        optionsPanel.add(new JLabel(strings.getString("biomes.variations")));
         for (BiomeOption option: availableOptions) {
             JCheckBox checkBox = new JCheckBox(createOptionName(option));
             checkBox.addActionListener(event -> updateOptions());
@@ -336,7 +336,7 @@ public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiom
     }
 
     private void updateLabels() {
-        label1.setText("Selected biome: " + (showIds ? selectedBiome : ""));
+        label1.setText(java.text.MessageFormat.format(strings.getString("biomes.selected"), (showIds ? selectedBiome : "")));
         label1.setIcon(biomeHelper.getBiomeIcon(selectedBiome));
         label2.setText(biomeHelper.getBiomeNameWithoutId(selectedBiome));
     }
@@ -349,7 +349,7 @@ public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiom
         button.putClientProperty(KEY_PAINT_ID, createDiscreteLayerPaintId(Biome.INSTANCE, biome));
         button.putClientProperty(KEY_CUSTOM_BIOME, TRUE);
         button.setMargin(App.BUTTON_INSETS);
-        button.setToolTipText(customBiome.getName() + " (" + biome + "); right-click for options");
+        button.setToolTipText(java.text.MessageFormat.format(strings.getString("biomes.custom.tooltip"), customBiome.getName(), biome));
         button.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -375,7 +375,7 @@ public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiom
                 private void showPopupMenu(MouseEvent e) {
                     JPopupMenu popup = new BetterJPopupMenu();
                     
-                    JMenuItem item = new JMenuItem("Edit...");
+                    JMenuItem item = new JMenuItem(strings.getString("edit"));
                     item.addActionListener(actionEvent -> {
                         CustomBiomeDialog dialog = new CustomBiomeDialog(SwingUtilities.getWindowAncestor(button), customBiome, false, App.getInstance().getWorld().getPlatform());
                         dialog.setVisible(true);
@@ -385,9 +385,9 @@ public class BiomesPanel extends JPanel implements CustomBiomeManager.CustomBiom
                     });
                     popup.add(item);
                     
-                    item = new JMenuItem("Remove...");
+                    item = new JMenuItem(strings.getString("remove") + "...");
                     item.addActionListener(actionEvent -> {
-                        if (JOptionPane.showConfirmDialog(button, "Are you sure you want to remove custom biome \"" + customBiome.getName() + "\" (ID: " + customBiome.getId() + ")?\nAny occurrences will be replaced with Automatic Biomes", "Confirm Removal", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                        if (JOptionPane.showConfirmDialog(button, java.text.MessageFormat.format(strings.getString("biomes.confirm.remove.message"), customBiome.getName(), customBiome.getId()), strings.getString("biomes.confirm.remove.title"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                             customBiomeManager.removeCustomBiome(customBiome);
                         }
                     });

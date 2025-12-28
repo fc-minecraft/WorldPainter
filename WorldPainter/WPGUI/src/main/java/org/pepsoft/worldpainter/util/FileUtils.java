@@ -30,34 +30,33 @@ public class FileUtils {
         final Boolean old = UIManager.getBoolean("FileChooser.readOnly");
         UIManager.put("FileChooser.readOnly", TRUE);
         try {
-            if (SystemUtils.isMac() || SystemUtils.isWindows()) {
-                // On Macs the AWT file dialog looks much closer to native than the Swing one, so use it
-                return selectFileForOpenFallback(parent, title, fileOrDir, fileFilter);
-            } else {
-                try {
-                    final JFileChooser fileChooser;
-                    if (fileOrDir != null) {
-                        if (fileOrDir.isDirectory()) {
-                            fileChooser = new JFileChooser(fileOrDir);
-                        } else {
-                            fileChooser = new JFileChooser(fileOrDir.getParentFile());
-                            fileChooser.setSelectedFile(fileOrDir);
-                        }
+            // Always prefer Swing JFileChooser when using FlatLaf or to avoid cut-off native dialogs
+            // unless on Mac where AWT might still be preferred, but user reported issues so we try Swing generally if modern look is desired.
+            // Actually, we'll try JFileChooser first for consistency and control over size.
+            try {
+                final JFileChooser fileChooser;
+                if (fileOrDir != null) {
+                    if (fileOrDir.isDirectory()) {
+                        fileChooser = new JFileChooser(fileOrDir);
                     } else {
-                        fileChooser = new JFileChooser();
+                        fileChooser = new JFileChooser(fileOrDir.getParentFile());
+                        fileChooser.setSelectedFile(fileOrDir);
                     }
-                    fileChooser.setDialogTitle(title);
-                    fileChooser.setFileFilter(fileFilter);
-                    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                    if (ExceptionHandler.doWithoutExceptionReporting(() -> fileChooser.showOpenDialog(parent)) == APPROVE_OPTION) {
-                        return fileChooser.getSelectedFile();
-                    } else {
-                        return null;
-                    }
-                } catch (RuntimeException e) {
-                    logger.error("{} while using JFileChooser; falling back to FileDialog (message: \"{}\")", e.getClass().getSimpleName(), e.getMessage(), e);
-                    return selectFileForOpenFallback(parent, title, fileOrDir, fileFilter);
+                } else {
+                    fileChooser = new JFileChooser();
                 }
+                fileChooser.setPreferredSize(new Dimension(900, 700)); // Ensure good size
+                fileChooser.setDialogTitle(title);
+                fileChooser.setFileFilter(fileFilter);
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                if (ExceptionHandler.doWithoutExceptionReporting(() -> fileChooser.showOpenDialog(parent)) == APPROVE_OPTION) {
+                    return fileChooser.getSelectedFile();
+                } else {
+                    return null;
+                }
+            } catch (RuntimeException e) {
+                logger.error("{} while using JFileChooser; falling back to FileDialog (message: \"{}\")", e.getClass().getSimpleName(), e.getMessage(), e);
+                return selectFileForOpenFallback(parent, title, fileOrDir, fileFilter);
             }
         } finally {
             UIManager.put("FileChooser.readOnly", old);
@@ -124,35 +123,31 @@ public class FileUtils {
         final Boolean old = UIManager.getBoolean("FileChooser.readOnly");
         UIManager.put("FileChooser.readOnly", TRUE);
         try {
-            if (SystemUtils.isMac() || SystemUtils.isWindows()) {
-                // On Macs the AWT file dialog looks much closer to native than the Swing one, so use it
-                return selectFilesForOpenFallback(parent, title, fileOrDir, fileFilter);
-            } else {
-                try {
-                    final JFileChooser fileChooser;
-                    if (fileOrDir != null) {
-                        if (fileOrDir.isDirectory()) {
-                            fileChooser = new JFileChooser(fileOrDir);
-                        } else {
-                            fileChooser = new JFileChooser(fileOrDir.getParentFile());
-                            fileChooser.setSelectedFile(fileOrDir);
-                        }
+            try {
+                final JFileChooser fileChooser;
+                if (fileOrDir != null) {
+                    if (fileOrDir.isDirectory()) {
+                        fileChooser = new JFileChooser(fileOrDir);
                     } else {
-                        fileChooser = new JFileChooser();
+                        fileChooser = new JFileChooser(fileOrDir.getParentFile());
+                        fileChooser.setSelectedFile(fileOrDir);
                     }
-                    fileChooser.setMultiSelectionEnabled(true);
-                    fileChooser.setDialogTitle(title);
-                    fileChooser.setFileFilter(fileFilter);
-                    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                    if (ExceptionHandler.doWithoutExceptionReporting(() -> fileChooser.showOpenDialog(parent)) == APPROVE_OPTION) {
-                        return fileChooser.getSelectedFiles();
-                    } else {
-                        return null;
-                    }
-                } catch (RuntimeException e) {
-                    logger.error("{} while using JFileChooser; falling back to FileDialog (message: \"{}\")", e.getClass().getSimpleName(), e.getMessage(), e);
-                    return selectFilesForOpenFallback(parent, title, fileOrDir, fileFilter);
+                } else {
+                    fileChooser = new JFileChooser();
                 }
+                fileChooser.setPreferredSize(new Dimension(900, 700));
+                fileChooser.setMultiSelectionEnabled(true);
+                fileChooser.setDialogTitle(title);
+                fileChooser.setFileFilter(fileFilter);
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                if (ExceptionHandler.doWithoutExceptionReporting(() -> fileChooser.showOpenDialog(parent)) == APPROVE_OPTION) {
+                    return fileChooser.getSelectedFiles();
+                } else {
+                    return null;
+                }
+            } catch (RuntimeException e) {
+                logger.error("{} while using JFileChooser; falling back to FileDialog (message: \"{}\")", e.getClass().getSimpleName(), e.getMessage(), e);
+                return selectFilesForOpenFallback(parent, title, fileOrDir, fileFilter);
             }
         } finally {
             UIManager.put("FileChooser.readOnly", old);
