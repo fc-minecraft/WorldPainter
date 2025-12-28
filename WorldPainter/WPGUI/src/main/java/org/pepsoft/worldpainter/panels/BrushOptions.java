@@ -347,13 +347,13 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
         if (paint instanceof String) {
             switch ((String) paint) {
                 case TerrainOrLayerFilter.WATER:
-                    return "Water";
+                    return strings.getString("brush.water");
                 case TerrainOrLayerFilter.LAVA:
-                    return "Lava";
+                    return strings.getString("brush.lava");
                 case TerrainOrLayerFilter.LAND:
-                    return "Land";
+                    return strings.getString("brush.land");
                 case TerrainOrLayerFilter.AUTO_BIOMES:
-                    return "All Auto Biomes";
+                    return strings.getString("brush.all_auto_biomes");
                 default:
                     throw new UnsupportedOperationException("Paint of type \"" + paint + "\" not supported");
             }
@@ -365,9 +365,9 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
                 return new BiomeHelper(colourScheme, customBiomeManager, platform).getBiomeName(abs(layerValue.value));
             } else if (layerValue.layer instanceof Annotations) {
                 if (layerValue.value == -1) {
-                    return "All Annotations";
+                    return strings.getString("brush.all_annotations");
                 } else {
-                    return Annotations.getColourName(layerValue.value) + " Annotations";
+                    return Annotations.getColourName(layerValue.value) + " " + strings.getString("brush.annotations");
                 }
             } else {
                 throw new UnsupportedOperationException("Paint of layer type " + layerValue.layer.getClass() + " and value " + layerValue.value + " not supported");
@@ -489,21 +489,21 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
     
     @SuppressWarnings("unchecked") // Guaranteed by code
     private JMenu createObjectSelectionMenu(final String descriptor, final ObjectSelectionListener listener, final boolean addAnother, final Object currentSelection) {
-        final JMenuItem waterItem = new JMenuItem("Water", ICON_WATER);
-        waterItem.addActionListener(e -> listener.objectSelected(TerrainOrLayerFilter.WATER, "Water", null));
+        final JMenuItem waterItem = new JMenuItem(strings.getString("brush.water"), ICON_WATER);
+        waterItem.addActionListener(e -> listener.objectSelected(TerrainOrLayerFilter.WATER, strings.getString("brush.water"), null));
         JMenu popupMenu = new JMenu();
         popupMenu.add(waterItem);
 
-        final JMenuItem lavaItem = new JMenuItem("Lava", ICON_LAVA);
-        lavaItem.addActionListener(e -> listener.objectSelected(TerrainOrLayerFilter.LAVA, "Lava", null));
+        final JMenuItem lavaItem = new JMenuItem(strings.getString("brush.lava"), ICON_LAVA);
+        lavaItem.addActionListener(e -> listener.objectSelected(TerrainOrLayerFilter.LAVA, strings.getString("brush.lava"), null));
         popupMenu.add(lavaItem);
 
-        final JMenuItem landItem = new JMenuItem("Land");
-        landItem.addActionListener(e -> listener.objectSelected(TerrainOrLayerFilter.LAND, "Land", null));
+        final JMenuItem landItem = new JMenuItem(strings.getString("brush.land"));
+        landItem.addActionListener(e -> listener.objectSelected(TerrainOrLayerFilter.LAND, strings.getString("brush.land"), null));
         popupMenu.add(landItem);
 
-        final JMenuItem eyedropperItem = new JMenuItem("Select on Map", ICON_EYEDROPPER);
-        eyedropperItem.setToolTipText("Select a paint from the map");
+        final JMenuItem eyedropperItem = new JMenuItem(strings.getString("brush.select_on_map"), ICON_EYEDROPPER);
+        eyedropperItem.setToolTipText(strings.getString("brush.select_paint_tooltip"));
         final App app = App.getInstance();
         final ColourScheme colourScheme = app.getColourScheme();
         if (mapSelectionListener != null) {
@@ -555,9 +555,9 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
         }
         popupMenu.add(eyedropperItem);
 
-        final JMenu terrainMenu = new JMenu("Terrain");
-        final JMenu customTerrainMenu = new JMenu("Custom");
-        final JMenu stainedClayTerrainMenu = new JMenu("Stained Terracotta");
+        final JMenu terrainMenu = new JMenu(strings.getString("brush.terrain"));
+        final JMenu customTerrainMenu = new JMenu(strings.getString("brush.custom"));
+        final JMenu stainedClayTerrainMenu = new JMenu(strings.getString("brush.stained_terracotta"));
         for (Terrain terrain: Terrain.getConfiguredValues()) {
             final Terrain selectedTerrain = terrain;
             final String name = terrain.getName();
@@ -578,7 +578,7 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
         }
         popupMenu.add(terrainMenu);
         
-        final JMenu layerMenu = new JMenu("Layer");
+        final JMenu layerMenu = new JMenu(strings.getString("brush.layer"));
         LayerManager.getInstance().getLayers().stream()
             .filter(layer -> ! layer.equals(Biome.INSTANCE))
             .forEach(layer -> {
@@ -593,7 +593,7 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
             app.getCustomLayersByPalette().entrySet().stream()
                 .map((entry) -> {
                     String palette = entry.getKey();
-                    JMenu paletteMenu = new JMenu(palette != null ? palette : "Hidden Layers");
+                    JMenu paletteMenu = new JMenu(palette != null ? palette : strings.getString("brush.hidden_layers"));
                     entry.getValue().forEach(layer -> {
                         JMenuItem menuItem = new JMenuItem(layer.getName(), new ImageIcon(layer.getIcon()));
                         menuItem.addActionListener(e -> listener.objectSelected(layer, layer.getName(), new ImageIcon(layer.getIcon())));
@@ -610,12 +610,12 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
         }
         popupMenu.add(layerMenu);
 
-        final JMenu biomeMenu = new JMenu("Biome");
+        final JMenu biomeMenu = new JMenu(strings.getString("brush.biome"));
         final CustomBiomeManager customBiomeManager = app.getCustomBiomeManager();
         final BiomeHelper biomeHelper = new BiomeHelper(colourScheme, customBiomeManager, platform);
         List<CustomBiome> customBiomes = customBiomeManager.getCustomBiomes();
         if (! customBiomes.isEmpty()) {
-            JMenu customBiomeMenu = new JMenu("Custom");
+            JMenu customBiomeMenu = new JMenu(strings.getString("brush.custom"));
             for (CustomBiome customBiome: customBiomes) {
                 final int selectedBiome = customBiome.getId();
                 final String name = biomeHelper.getBiomeName(selectedBiome);
@@ -652,9 +652,9 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
                 }
             }
         }
-        final JMenu autoBiomeSubMenu = new JMenu("Auto Biomes");
-        final JMenuItem autoBiomesMenuItem = new JMenuItem("All Auto Biomes");
-        autoBiomesMenuItem.addActionListener(e -> listener.objectSelected(TerrainOrLayerFilter.AUTO_BIOMES, "All Auto Biomes", null));
+        final JMenu autoBiomeSubMenu = new JMenu(strings.getString("brush.auto_biomes"));
+        final JMenuItem autoBiomesMenuItem = new JMenuItem(strings.getString("brush.all_auto_biomes"));
+        autoBiomesMenuItem.addActionListener(e -> listener.objectSelected(TerrainOrLayerFilter.AUTO_BIOMES, strings.getString("brush.all_auto_biomes"), null));
         autoBiomeSubMenu.add(autoBiomesMenuItem);
         for (int autoBiome: Dimension.POSSIBLE_AUTO_BIOMES) {
             final int selectedBiome = -autoBiome;
@@ -667,16 +667,16 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
         biomeMenu.add(autoBiomeSubMenu);
         popupMenu.add(biomeMenu);
 
-        final JMenu annotationsMenu = new JMenu("Annotations");
-        JMenuItem menuItem = new JMenuItem("All Annotations");
-        menuItem.addActionListener(e -> listener.objectSelected(new LayerValue(Annotations.INSTANCE), "All Annotations", null));
+        final JMenu annotationsMenu = new JMenu(strings.getString("brush.annotations"));
+        JMenuItem menuItem = new JMenuItem(strings.getString("brush.all_annotations"));
+        menuItem.addActionListener(e -> listener.objectSelected(new LayerValue(Annotations.INSTANCE), strings.getString("brush.all_annotations"), null));
         annotationsMenu.add(menuItem);
         for (int i = 1; i < 16; i++) {
             final int layerValue = i;
             final Icon icon  = createScaledColourIcon(Annotations.getColour(layerValue, colourScheme));
             final String colourName = Annotations.getColourName(layerValue);
             menuItem = new JMenuItem(colourName, icon);
-            menuItem.addActionListener(e -> listener.objectSelected(new LayerValue(Annotations.INSTANCE, layerValue), colourName + " Annotations", icon));
+            menuItem.addActionListener(e -> listener.objectSelected(new LayerValue(Annotations.INSTANCE, layerValue), colourName + " " + strings.getString("brush.annotations"), icon));
             annotationsMenu.add(menuItem);
         }
         popupMenu.add(annotationsMenu);
@@ -691,9 +691,9 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
                     selection.add(currentSelection);
                 }
                 selection.add(object);
-                listener.objectSelected(selection, "Multiple", ICON_PLUS);
+                listener.objectSelected(selection, strings.getString("brush.multiple"), ICON_PLUS);
             }), true, currentSelection);
-            subMenu.setText("Add Another");
+            subMenu.setText(strings.getString("brush.add_another"));
             subMenu.setIcon(ICON_PLUS);
             popupMenu.add(subMenu);
         }
@@ -738,7 +738,7 @@ public class BrushOptions extends javax.swing.JPanel implements Observer {
             // from the rest of the menu items and insert it between the menu
             // items and the submenus
             if (menu.getMenuComponentCount() > 0) {
-                menu.setText("More");
+                menu.setText(strings.getString("brush.more"));
                 menu.setToolTipText(null);
                 replacementMenu.add(breakUpLongMenus(menu, maxLength), index);
             }

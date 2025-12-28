@@ -3443,7 +3443,7 @@ public final class App extends JFrame implements BrushControl,
         customTerrainPanel = new JPanel(new WrapLayout(FlowLayout.LEADING));
 
         JButton addCustomTerrainButton = new JButton(ACTION_SHOW_CUSTOM_TERRAIN_POPUP);
-        addCustomTerrainButton.setMargin(App.BUTTON_INSETS);
+        addCustomTerrainButton.setMargin(ThemeManager.BUTTON_MARGINS);
         customTerrainPanel.add(addCustomTerrainButton);
 
         return customTerrainPanel;
@@ -3677,7 +3677,7 @@ public final class App extends JFrame implements BrushControl,
         menu.add(menuItem);
 
         final Configuration config = Configuration.getInstance();
-        recentMenu = new JMenu("Recently used Worlds");
+        recentMenu = new JMenu(strings.getString("file.recent"));
         if ((config.getRecentFiles() != null) && (! config.getRecentFiles().isEmpty())) {
             updateRecentMenu();
         } else {
@@ -3688,7 +3688,7 @@ public final class App extends JFrame implements BrushControl,
         if (! config.isEasyMode()) {
             menuItem = new JMenuItem(ACTION_IMPORT_MAP);
             menuItem.setMnemonic('m');
-            menuItem.setText("From Minecraft map...");
+            menuItem.setText(strings.getString("import.minecraft"));
             JMenu subMenu = new JMenu(strings.getString("import"));
             subMenu.setMnemonic('i');
             subMenu.add(menuItem);
@@ -3717,12 +3717,11 @@ public final class App extends JFrame implements BrushControl,
 
         menuItem = new JMenuItem(ACTION_EXPORT_WORLD);
         menuItem.setMnemonic('m');
-        if (config.isEasyMode()) {
-            menu.add(menuItem);
-        } else {
+        menu.add(menuItem);
+
+        if (! config.isEasyMode()) {
             JMenu exportMenu = new JMenu(strings.getString("export"));
             exportMenu.setMnemonic('e');
-            exportMenu.add(menuItem);
 
             menuItem = new JMenuItem(strings.getString("export.as.image.file") + "...");
             menuItem.addActionListener(event -> exportImage());
@@ -3734,7 +3733,7 @@ public final class App extends JFrame implements BrushControl,
             menuItem.setMnemonic('h');
             exportMenu.add(menuItem);
 
-            menuItem = new JMenuItem("Export as 1:256 (high resolution) integer height map...");
+            menuItem = new JMenuItem(strings.getString("export.heightmap.high"));
             menuItem.addActionListener(event -> exportHeightMap(INTEGER_HIGH_RESOLUTION));
             exportMenu.add(menuItem);
 
@@ -4127,7 +4126,7 @@ public final class App extends JFrame implements BrushControl,
     }
 
     private JMenu createToolsMenu() {
-        JMenuItem menuItem = new JMenuItem(strings.getString("respawn.player") + "...");
+        JMenuItem menuItem = new JMenuItem(strings.getString("tools.respawn"));
         menuItem.addActionListener(e -> {
             RespawnPlayerDialog dialog = new RespawnPlayerDialog(App.this);
             dialog.setVisible(true);
@@ -4137,7 +4136,7 @@ public final class App extends JFrame implements BrushControl,
         menu.setMnemonic('t');
         menu.add(menuItem);
 
-        menuItem = new JMenuItem(strings.getString("open.custom.brushes.folder"));
+        menuItem = new JMenuItem(strings.getString("tools.open_brushes"));
         menuItem.addActionListener(e -> {
             File brushesDir = new File(Configuration.getConfigDir(), "brushes");
             if (! brushesDir.exists()) {
@@ -4151,7 +4150,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('c');
         menu.add(menuItem);
 
-        menuItem = new JMenuItem(strings.getString("open.plugins.folder"));
+        menuItem = new JMenuItem(strings.getString("tools.open_plugins"));
         menuItem.addActionListener(e -> {
             File pluginsDir = new File(Configuration.getConfigDir(), "plugins");
             if (! pluginsDir.exists()) {
@@ -4165,7 +4164,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('p');
         menu.add(menuItem);
 
-        menuItem = new JMenuItem(strings.getString("menu.tools.open.custom.materials.folder"));
+        menuItem = new JMenuItem(strings.getString("tools.open_materials"));
         menuItem.addActionListener(e -> {
             File customMaterialsDir = new File(Configuration.getConfigDir(), "materials");
             if (! customMaterialsDir.exists()) {
@@ -4237,7 +4236,7 @@ public final class App extends JFrame implements BrushControl,
         menuItem.setMnemonic('b');
         menu.add(menuItem);
 
-        menuItem = new JMenuItem(strings.getString("menu.tools.run.script"));
+        menuItem = new JMenuItem(strings.getString("tools.run_script"));
         menuItem.addActionListener(e -> {
             try {
                 new ScriptRunner(this, world, dimension, undoManagers.values()).setVisible(true);
@@ -4258,7 +4257,7 @@ public final class App extends JFrame implements BrushControl,
         JMenu menu = new JMenu(strings.getString("help"));
 //        menu.setMnemonic('h');
         if (! hideAbout) {
-            JMenuItem menuItem = new JMenuItem(strings.getString("about"));
+            JMenuItem menuItem = new JMenuItem(strings.getString("help.about"));
             menuItem.setMnemonic('a');
             menuItem.addActionListener(e -> {
                 AboutDialog dialog = new AboutDialog(App.this, world, view, currentUndoManager);
@@ -4865,14 +4864,22 @@ public final class App extends JFrame implements BrushControl,
         }
     }
 
+    private String getLocalizedLayerName(Layer layer) {
+        try {
+            return strings.getString("layer." + layer.getId() + ".name");
+        } catch (MissingResourceException e) {
+            return layer.getName();
+        }
+    }
+
     private List<Component> createLayerButton(final Layer layer, final char mnemonic, final boolean createSoloCheckbox, final boolean createButton) {
         if (createButton) {
             final JToggleButton button = new JToggleButton();
-            button.setMargin(new Insets(2, 2, 2, 2));
+            button.setMargin(ThemeManager.BUTTON_MARGINS);
             if (layer.getIcon() != null) {
                 button.setIcon(new ImageIcon(layer.getIcon()));
             }
-            button.setToolTipText(layer.getName() + ": " + layer.getDescription());
+            button.setToolTipText(getLocalizedLayerName(layer) + ": " + layer.getDescription());
             // TODO: make this work again, but with Ctrl + Alt or something
 //            if (mnemonic != 0) {
 //                button.setMnemonic(mnemonic);
@@ -4887,12 +4894,12 @@ public final class App extends JFrame implements BrushControl,
                 }
             });
             paintButtonGroup.add(button);
-            button.setText(layer.getName());
+            button.setText(getLocalizedLayerName(layer));
             button.putClientProperty(KEY_HELP_KEY, "Layer/" + layer.getId());
             button.putClientProperty(KEY_PAINT_ID, createLayerPaintId(layer));
             return createLayerRow(layer, true, createSoloCheckbox, button);
         } else {
-            JLabel label = new JLabel(layer.getName(), new ImageIcon(layer.getIcon()), JLabel.LEADING);
+            JLabel label = new JLabel(getLocalizedLayerName(layer), new ImageIcon(layer.getIcon()), JLabel.LEADING);
             label.putClientProperty(KEY_HELP_KEY, "Layer/" + layer.getId());
             return createLayerRow(layer, true, createSoloCheckbox, label);
         }

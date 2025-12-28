@@ -8,7 +8,7 @@ All core visual settings are located in:
 `WorldPainter/WPGUI/src/main/java/org/pepsoft/worldpainter/theme/ThemeManager.java`
 
 You can change:
-*   **Fonts:** `FONT_SIZE_BASE` (default: 16)
+*   **Fonts:** `FONT_SIZE_BASE` (default: 14)
 *   **Icons:** `ICON_SIZE_MEDIUM`, `ICON_SIZE_LARGE`, `ICON_SIZE_EXTRA_LARGE`
 *   **Buttons:** `BUTTON_ARC` (Roundness), `BUTTON_MARGINS` (Padding)
 *   **Layout:** `ROW_HEIGHT`, `TAB_HEIGHT`
@@ -16,7 +16,7 @@ You can change:
 ### Example: Changing Font Size
 To make the font larger, edit line ~20 in `ThemeManager.java`:
 ```java
-public static final int FONT_SIZE_BASE = 18; // Changed from 16 to 18
+public static final int FONT_SIZE_BASE = 18; // Changed from 14 to 18
 ```
 
 ## 2. Localization (Strings)
