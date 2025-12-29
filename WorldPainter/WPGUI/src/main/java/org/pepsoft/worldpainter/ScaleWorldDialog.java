@@ -13,9 +13,7 @@ import org.pepsoft.worldpainter.history.HistoryEntry;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -48,14 +46,10 @@ public class ScaleWorldDialog extends WorldPainterDialog {
                 .collect(toList());
 
         initComponents();
-        String dimName = new Anchor(anchor.dim, DETAIL, false, 0).getDefaultName();
-        if (strings.containsKey("dimension.name." + dimName)) {
-            dimName = strings.getString("dimension.name." + dimName);
-        }
-        setTitle(MessageFormat.format(strings.getString("dialog.scale.title"), dimName));
+        setTitle("Scale " + new Anchor(anchor.dim, DETAIL, false, 0).getDefaultName() + " Dimension");
         final Dimension dimension = world.getDimension(anchor);
         final int width = dimension.getWidth() * TILE_SIZE, height = dimension.getHeight() * TILE_SIZE;
-        labelCurrentSize.setText(MessageFormat.format(strings.getString("dialog.scale.blocks"), INT_NUMBER_FORMAT.format(width), INT_NUMBER_FORMAT.format(height)));
+        labelCurrentSize.setText(format("%s x %s blocks", INT_NUMBER_FORMAT.format(width), INT_NUMBER_FORMAT.format(height)));
         labelCurrentWalkingTime.setText(getWalkingTime(width, height));
         updateNewSize();
 
@@ -67,16 +61,16 @@ public class ScaleWorldDialog extends WorldPainterDialog {
     private void scale() {
         final int percentage = (int) spinnerScaleFactor.getValue();
         if (percentage == 100) {
-            beepAndShowError(this, strings.getString("dialog.scale.error.factor_100"), strings.getString("dialog.scale.title.factor_100"));
+            beepAndShowError(this, "Select a scaling factor other than 100%", "Select Scaling Factor");
             return;
-        } else if (JOptionPane.showConfirmDialog(this, MessageFormat.format(strings.getString("dialog.scale.confirm"), percentage), strings.getString("dialog.scale.title.confirm"), YES_NO_OPTION) != OK_OPTION) {
+        } else if (JOptionPane.showConfirmDialog(this, "Are you sure you want to scale this dimension by " + percentage + "%?\nThis cannot be undone!", "Confirm Scaling", YES_NO_OPTION) != OK_OPTION) {
             return;
         }
         final CoordinateTransform transform = CoordinateTransform.getScalingInstance(percentage / 100f);
         ProgressDialog.executeTask(this, new ProgressTask<Void>() {
             @Override
             public String getName() {
-                return strings.getString("dialog.scale.progress");
+                return "Scaling dimension(s)";
             }
 
             @Override
@@ -90,7 +84,7 @@ public class ScaleWorldDialog extends WorldPainterDialog {
             }
         }, NOT_CANCELABLE);
         if (affectedDimensions.stream().flatMap(dimension -> dimension.getOverlays().stream()).anyMatch(overlay -> ! overlay.getFile().canRead())) {
-            beepAndShowWarning(this, strings.getString("dialog.scale.warning.overlays"), strings.getString("dialog.scale.title.overlays"));
+            beepAndShowWarning(this, "One or more overlay image files could not be read,\nand have therefore not been scaled.\nYou will need to scale these manually.", "Not All Overlays Scaled");
         }
         ok();
     }
@@ -99,7 +93,7 @@ public class ScaleWorldDialog extends WorldPainterDialog {
         final Dimension dimension = world.getDimension(anchor);
         final float scale = (int) spinnerScaleFactor.getValue() / 100f;
         final int newWidth = Math.round(dimension.getWidth() * TILE_SIZE * scale), newHeight = Math.round(dimension.getHeight() * TILE_SIZE * scale);
-        labelNewSize.setText(MessageFormat.format(strings.getString("dialog.scale.blocks"), INT_NUMBER_FORMAT.format(newWidth), INT_NUMBER_FORMAT.format(newHeight)));
+        labelNewSize.setText(format("%s x %s blocks", INT_NUMBER_FORMAT.format(newWidth), INT_NUMBER_FORMAT.format(newHeight)));
         labelNewWalkingTime.setText(getWalkingTime(newWidth, newHeight));
     }
     
@@ -116,7 +110,7 @@ public class ScaleWorldDialog extends WorldPainterDialog {
             if (westEastTime.equals(northSouthTime)) {
                 return westEastTime;
             } else {
-                return MessageFormat.format(strings.getString("dialog.scale.time.directional"), westEastTime, northSouthTime);
+                return "west to east: " + westEastTime + ", north to south: " + northSouthTime;
             }
         }
     }
@@ -148,20 +142,20 @@ public class ScaleWorldDialog extends WorldPainterDialog {
         jLabel10 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle(strings.getString("dialog.scale.title"));
+        setTitle("Scale World");
 
-        jLabel1.setText(strings.getString("dialog.scale.label.intro"));
+        jLabel1.setText("Scale the current dimension according to these settings:");
 
-        jLabel2.setText(strings.getString("dialog.scale.label.current_size"));
+        jLabel2.setText("Current size:");
 
-        jLabel3.setText(strings.getString("dialog.scale.label.current_time"));
+        jLabel3.setText("Current edge to edge walking time:");
 
         labelCurrentSize.setText("jLabel4");
 
         labelCurrentWalkingTime.setText("jLabel4");
 
         jLabel4.setLabelFor(spinnerScaleFactor);
-        jLabel4.setText(strings.getString("dialog.scale.label.factor"));
+        jLabel4.setText("Scale factor:");
 
         spinnerScaleFactor.setModel(new javax.swing.SpinnerNumberModel(100, 10, 1000, 1));
         spinnerScaleFactor.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -172,34 +166,34 @@ public class ScaleWorldDialog extends WorldPainterDialog {
 
         jLabel5.setText("%");
 
-        buttonCancel.setText(strings.getString("cancel"));
+        buttonCancel.setText("Cancel");
         buttonCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonCancelActionPerformed(evt);
             }
         });
 
-        buttonScale.setText(strings.getString("scale"));
+        buttonScale.setText("Scale");
         buttonScale.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonScaleActionPerformed(evt);
             }
         });
 
-        jLabel6.setText(strings.getString("dialog.scale.label.new_size"));
+        jLabel6.setText("New size:");
 
         labelNewSize.setText("jLabel7");
 
-        jLabel7.setText(strings.getString("dialog.scale.label.new_time"));
+        jLabel7.setText("New edge to edge walking time:");
 
         labelNewWalkingTime.setText("jLabel8");
 
-        jLabel8.setText(strings.getString("dialog.scale.notes"));
+        jLabel8.setText("<html>\nNotes:\n<ul>\n<li>The terrain height and continuous layers such as trees, Custom Object layers, Frost, etc.<br>\nwill be scaled smoothly using bicubic interpolation. Artefacts are still unavoidable though,<br>\nespecially at larger scales.\n<li>Discrete layers such as Annotations and Biomes, but also the terrain type will be scaled<br>\nusing nearest neighbour interpolation. At larger scales these will become noticeably blocky.\n<li>Scaling low-resolution terrain (Imported from Minecraft, or from a low resolution height<br>\nmap) may result in blocky results.\n<li>Extra land may be added around the edges in order to meet chunk boundaries.\n<li><strong>Caution:</strong> if you are scaling up this may fail if there is not enough memory. Save your work to<br>\ndisk first!\n</ul>\n</html>");
 
         jLabel9.setFont(jLabel9.getFont().deriveFont((jLabel9.getFont().getStyle() | java.awt.Font.ITALIC)));
-        jLabel9.setText(strings.getString("dialog.scale.warning.undone"));
+        jLabel9.setText("This operation cannot be undone!");
 
-        jLabel10.setText(strings.getString("dialog.scale.warning.associated"));
+        jLabel10.setText("<html><i>All associated dimension such as Ceiling Dimensions and<br> Custom Cave/Tunnel Floor Dimensions will be scaled together.</i></html>");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -327,6 +321,4 @@ public class ScaleWorldDialog extends WorldPainterDialog {
     private final World2 world;
     private final Anchor anchor;
     private final List<Dimension> affectedDimensions;
-
-    private static final ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
 }

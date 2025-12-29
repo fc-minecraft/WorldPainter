@@ -24,9 +24,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import static org.pepsoft.util.GUIUtils.scaleToUI;
 import static org.pepsoft.worldpainter.Constants.*;
@@ -44,7 +42,7 @@ public class BiomesViewerFrame extends JFrame {
     }
     
     public BiomesViewerFrame(long seed, final Point marker, int preferredBiomeAlgorithm, ColourScheme colourScheme, SeedListener seedListener) throws HeadlessException {
-        super(strings.getString("dialog.biomes.title"));
+        super("WorldPainter - Biomes Viewer");
         this.colourScheme = colourScheme;
         this.seedListener = seedListener;
         standAloneMode = App.getInstanceIfExists() == null;
@@ -74,7 +72,7 @@ public class BiomesViewerFrame extends JFrame {
         getContentPane().add(imageViewer, BorderLayout.CENTER);
 
         JToolBar toolBar = new JToolBar();
-        toolBar.add(new JLabel(strings.getString("dialog.biomes.label.scheme")));
+        toolBar.add(new JLabel("Biome scheme:"));
         List<Integer> availableAlgorithms = BiomeSchemeManager.getAvailableBiomeAlgorithms();
         //noinspection unchecked // NetBeans visual designer
         schemeChooser = new JComboBox(availableAlgorithms.toArray());
@@ -85,19 +83,19 @@ public class BiomesViewerFrame extends JFrame {
                 if (value instanceof Integer) {
                     switch ((Integer) value) {
                         case BIOME_ALGORITHM_1_1:
-                            setText(strings.getString("dialog.biomes.scheme.1.1"));
+                            setText("Minecraft 1.1");
                             break;
                         case BIOME_ALGORITHM_1_2_AND_1_3_DEFAULT:
-                            setText(strings.getString("dialog.biomes.scheme.1.2"));
+                            setText("Minecraft 1.2 - 1.6 Default");
                             break;
                         case BIOME_ALGORITHM_1_3_LARGE:
-                            setText(strings.getString("dialog.biomes.scheme.1.3"));
+                            setText("Minecraft 1.3 - 1.6 Large");
                             break;
                         case BIOME_ALGORITHM_1_7_DEFAULT:
-                            setText(strings.getString("dialog.biomes.scheme.1.7"));
+                            setText("Minecraft 1.7 - 1.12 Default");
                             break;
                         case BIOME_ALGORITHM_1_7_LARGE:
-                            setText(strings.getString("dialog.biomes.scheme.1.7.large"));
+                            setText("Minecraft 1.7 - 1.12 Large");
                             break;
                     }
                 }
@@ -126,7 +124,7 @@ public class BiomesViewerFrame extends JFrame {
         });
         toolBar.add(schemeChooser);
         toolBar.add(Box.createHorizontalStrut(5));
-        toolBar.add(new JLabel(strings.getString("dialog.biomes.label.seed")));
+        toolBar.add(new JLabel("Seed:"));
         seedSpinner.setEditor(new JSpinner.NumberEditor(seedSpinner, "0"));
         seedSpinner.addChangeListener(e -> {
             if (BiomesViewerFrame.this.biomeScheme != null) {
@@ -156,16 +154,16 @@ public class BiomesViewerFrame extends JFrame {
         toolBar.add(button);
         
         toolBar.add(Box.createHorizontalStrut(5));
-        createWorldButton = new JButton(strings.getString("dialog.biomes.button.create"));
+        createWorldButton = new JButton("Create world");
         if (! standAloneMode) {
-            createWorldButton.setToolTipText(strings.getString("dialog.biomes.tooltip.create"));
+            createWorldButton.setToolTipText("Create a new WorldPainter world from the selected tiles");
             createWorldButton.addActionListener(e -> createWorld());
         }
         createWorldButton.setEnabled(false);
         toolBar.add(createWorldButton);
         
         toolBar.add(Box.createHorizontalStrut(5));
-        button = new JButton(strings.getString("dialog.biomes.button.reset"));
+        button = new JButton("Reset");
         button.addActionListener(e -> {
             imageViewer.setZoom(-2);
             if (marker != null) {
@@ -178,21 +176,21 @@ public class BiomesViewerFrame extends JFrame {
         
         if (seedListener != null) {
             toolBar.add(Box.createHorizontalStrut(5));
-            button = new JButton(strings.getString("dialog.biomes.button.copy"));
-            button.setToolTipText(strings.getString("dialog.biomes.tooltip.copy"));
+            button = new JButton("Copy seed to world");
+            button.setToolTipText("Copy the current seed to the world currently being edited");
             button.addActionListener(e -> BiomesViewerFrame.this.seedListener.setSeed(((Number) seedSpinner.getValue()).longValue(), ((schemeChooser.getSelectedIndex() == 1) || (schemeChooser.getSelectedIndex() == 3)) ? Generator.LARGE_BIOMES : Generator.DEFAULT));
             toolBar.add(button);
         }
         
         toolBar.add(Box.createHorizontalStrut(5));
-        button = new JButton(strings.getString("dialog.biomes.button.play.survival"));
-        button.setToolTipText(strings.getString("dialog.biomes.tooltip.play.survival"));
+        button = new JButton("Play here in Survival mode");
+        button.setToolTipText("Create a Survival in Minecraft with this seed and at this location");
         button.addActionListener(event -> playHere(false));
         toolBar.add(button);
 
         toolBar.add(Box.createHorizontalStrut(5));
-        button = new JButton(strings.getString("dialog.biomes.button.play.creative"));
-        button.setToolTipText(strings.getString("dialog.biomes.tooltip.play.creative"));
+        button = new JButton("Play here in Creative mode");
+        button.setToolTipText("Create a Creative in Minecraft with this seed and at this location");
         button.addActionListener(event -> playHere(true));
         toolBar.add(button);
 
@@ -208,7 +206,7 @@ public class BiomesViewerFrame extends JFrame {
     }
 
     private void playHere(boolean creativeMode) {
-        String name = JOptionPane.showInputDialog(BiomesViewerFrame.this, strings.getString("dialog.biomes.input.map_name"), strings.getString("dialog.biomes.title.map_name"), JOptionPane.QUESTION_MESSAGE);
+        String name = JOptionPane.showInputDialog(BiomesViewerFrame.this, "Type a name for the map:", "Map Name", JOptionPane.QUESTION_MESSAGE);
         if ((name == null) || (name.trim().length() == 0)) {
             return;
         }
@@ -257,9 +255,9 @@ public class BiomesViewerFrame extends JFrame {
             throw new RuntimeException("I/O error writing level.dat file", e);
         }
         if (minecraftDirUsed) {
-            JOptionPane.showMessageDialog(BiomesViewerFrame.this, strings.getString("dialog.biomes.message.saved.minecraft"));
+            JOptionPane.showMessageDialog(BiomesViewerFrame.this, "Map saved! You can find it in Minecraft under Singleplayer.");
         } else {
-            JOptionPane.showMessageDialog(BiomesViewerFrame.this, MessageFormat.format(strings.getString("dialog.biomes.message.saved.file"), worldDir));
+            JOptionPane.showMessageDialog(BiomesViewerFrame.this, "Map saved as " + worldDir + ".\nMove it to your Minecraft saves directory to play.");
         }
     }
 
@@ -271,7 +269,7 @@ public class BiomesViewerFrame extends JFrame {
         final NewWorldDialog dialog = new NewWorldDialog(
             app,
             app.getColourScheme(),
-            strings.getString("generated.world"),
+            "Generated World",
             ((Number) seedSpinner.getValue()).longValue(),
             ((Integer) schemeChooser.getSelectedItem() == BIOME_ALGORITHM_1_1) ? DefaultPlugin.JAVA_MCREGION : DefaultPlugin.JAVA_ANVIL,
             NORMAL_DETAIL,
@@ -288,7 +286,7 @@ public class BiomesViewerFrame extends JFrame {
             World2 newWorld = ProgressDialog.executeTask(this, new ProgressTask<World2>() {
                 @Override
                 public String getName() {
-                    return strings.getString("creating.new.world");
+                    return "Creating new world";
                 }
                 
                 @Override
@@ -422,6 +420,4 @@ public class BiomesViewerFrame extends JFrame {
         private boolean selecting;
         private Point selectionCorner1, selectionCorner2;
     }
-
-    private static final ResourceBundle strings = ResourceBundle.getBundle("org.pepsoft.worldpainter.resources.strings");
 }

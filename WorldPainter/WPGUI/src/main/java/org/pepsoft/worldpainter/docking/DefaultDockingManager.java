@@ -26,9 +26,7 @@ public class DefaultDockingManager implements DockingManager {
         this.workspace = new Workspace();
 
         leftTabs = new JTabbedPane();
-        leftTabs.setMinimumSize(new Dimension(50, 50));
         rightTabs = new JTabbedPane();
-        rightTabs.setMinimumSize(new Dimension(50, 50));
 
         JSplitPane rightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, workspace, rightTabs);
         rightSplit.setResizeWeight(1.0); // Give space to workspace
