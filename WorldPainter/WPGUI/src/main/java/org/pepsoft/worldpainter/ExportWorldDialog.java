@@ -180,7 +180,11 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
         for (Dimension dimension: dimensions.values()) {
             final DimensionPropertiesEditor editor = new DimensionPropertiesEditor();
             editor.init(colourScheme, customBiomeManager, dimension, DimensionPropertiesEditor.Mode.EXPORT);
-            jTabbedPane1.addTab(dimension.getName(), editor);
+            String dimName = dimension.getName();
+            if (strings.containsKey("dimension.name." + dimName)) {
+                dimName = strings.getString("dimension.name." + dimName);
+            }
+            jTabbedPane1.addTab(dimName, editor);
             dimensionPropertiesEditors.put(dimension.getAnchor(), editor);
         }
     }
@@ -231,12 +235,12 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
         // Check for errors
         if (! new File(fieldDirectory.getText().trim()).isDirectory()) {
             fieldDirectory.requestFocusInWindow();
-            beepAndShowError(this, "The selected output directory does not exist or is not a directory.", "Error");
+            beepAndShowError(this, strings.getString("dialog.export.error.directory"), strings.getString("error"));
             return;
         }
         if (fieldName.getText().trim().isEmpty()) {
             fieldName.requestFocusInWindow();
-            beepAndShowError(this, "You have not specified a name for the map.", "Error");
+            beepAndShowError(this, strings.getString("dialog.export.error.name"), strings.getString("error"));
             return;
         }
 
@@ -248,17 +252,17 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
             final Generator generatorType = editor.getSelectedGeneratorType();
             final Dimension dimension = editor.getDimension();
             if ((editor.isPopulateSelected() || dimension.getAllLayers(true).contains(Populate.INSTANCE)) && (! platform.capabilities.contains(POPULATE))) {
-                sb.append("<li>Population not supported for<br>map format " + platform.displayName + "; it will not have an effect");
+                sb.append("<li>").append(MessageFormat.format(strings.getString("dialog.export.warning.population"), platform.displayName));
                 showWarning = true;
             } else if (exportAllDimensions || (selectedDimension == dimension.getAnchor().dim)) {
                 // The dimension is going to be exported
                 if ((generatorType == Generator.FLAT) && (editor.isPopulateSelected() || dimension.getAllLayers(true).contains(Populate.INSTANCE))) {
-                    sb.append("<li>The Superflat world type is selected and Populate is in use.<br>Minecraft will <em>not</em> populate generated chunks for Superflat maps.");
+                    sb.append("<li>").append(strings.getString("dialog.export.warning.superflat"));
                     showWarning = true;
                 }
             }
             if ((generatorType != null) && (! platform.supportedGenerators.contains(generatorType))) {
-                sb.append("<li>Map format " + platform.displayName + " does not support world type " + generatorType.getDisplayName() + ".<br>The world type will be reset to " + platform.supportedGenerators.get(0).getDisplayName() + ".");
+                sb.append("<li>").append(MessageFormat.format(strings.getString("dialog.export.warning.generator"), platform.displayName, generatorType.getDisplayName(), platform.supportedGenerators.get(0).getDisplayName()));
                 editor.setSelectedGeneratorType(platform.supportedGenerators.get(0));
                 showWarning = true;
             }
@@ -273,7 +277,7 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
                 }
             }
             if (! spawnInSelection) {
-                sb.append("<li>The spawn point is not inside the selected area.<br>It will temporarily be moved to the middle of the selected area.");
+                sb.append("<li>").append(strings.getString("dialog.export.warning.spawn"));
                 showWarning = true;
             }
         }
@@ -287,22 +291,22 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
         }
         if (disabledLayerCount > 0) {
             if (disabledLayerCount == 1) {
-                sb.append("<li>There are disabled custom layers!<br>One layer is not going to be exported.");
+                sb.append("<li>").append(strings.getString("dialog.export.warning.disabled_layers.single"));
             } else {
-                sb.append("<li>There are disabled custom layers!<br>" + disabledLayerCount + " layers are not going to be exported.");
+                sb.append("<li>").append(MessageFormat.format(strings.getString("dialog.export.warning.disabled_layers.multiple"), disabledLayerCount));
             }
             showWarning = showWarning || (! disableDisabledLayersWarning);
         }
         for (int i = 0; i < dataPacksListModel.size(); i++) {
             final File dataPackFile = dataPacksListModel.getElementAt(i);
             if (! dataPackFile.exists()) {
-                sb.append("<li>Data pack file " + dataPackFile.getName() + " cannot be found.<br>It will not be installed.");
+                sb.append("<li>").append(MessageFormat.format(strings.getString("dialog.export.warning.datapack.not_found"), dataPackFile.getName()));
                 showWarning = true;
             } else if (! dataPackFile.isFile()) {
-                sb.append("<li>Data pack file " + dataPackFile.getName() + " is not a regular file.<br>It will not be installed.");
+                sb.append("<li>").append(MessageFormat.format(strings.getString("dialog.export.warning.datapack.not_file"), dataPackFile.getName()));
                 showWarning = true;
             } else if (! dataPackFile.canRead()) {
-                sb.append("<li>Data pack file " + dataPackFile.getName() + " is not accessible.<br>It will not be installed.");
+                sb.append("<li>").append(MessageFormat.format(strings.getString("dialog.export.warning.datapack.not_accessible"), dataPackFile.getName()));
                 showWarning = true;
             }
         }
@@ -313,17 +317,14 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
                 logger.warn("Skipping previously acknowledged warnings for this world: {}", previouslyAcknowledgedWarnings);
             } else {
                 DesktopUtils.beep();
-                String text = "<html>Please confirm that you want to export the world<br>" +
-                        "notwithstanding the following warnings:<br>"
-                        + warnings
-                        + "Do you want to continue with the export?";
+                String text = MessageFormat.format(strings.getString("dialog.export.confirm.warnings"), warnings);
                 if (inhibitWarnings) {
                     text += "<br>" +
                             "<br>" +
                             "<strong>Note:</strong> on the next Test Export this screen will be skipped<br>" +
                             "if the warnings are identical.</html>";
                 }
-                if (JOptionPane.showConfirmDialog(this, text, "Review Warnings", YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) {
+                if (JOptionPane.showConfirmDialog(this, text, strings.getString("dialog.export.title.warnings"), YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) {
                     previouslyAcknowledgedWarnings = null;
                     warningsForWorld = null;
                     return;
@@ -476,7 +477,7 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
     }
 
     private void addDataPack() {
-        final File dataPackFile = selectFileForOpen(this, "Select a data pack", null, new FileFilter() {
+        final File dataPackFile = selectFileForOpen(this, strings.getString("dialog.export.title.select_datapack"), null, new FileFilter() {
             @Override
             public String getExtensions() {
                 return "*.zip";
@@ -489,21 +490,21 @@ public class ExportWorldDialog extends WPDialogWithPaintSelection {
 
             @Override
             public String getDescription() {
-                return "Data packs (*.zip)";
+                return strings.getString("dialog.export.filter.datapacks");
             }
         });
         if (dataPackFile != null) {
             if (! isDataPackFile(dataPackFile)) {
-                beepAndShowError(this, "The selected file \"" + dataPackFile.getName() + "\" is not a Minecraft data pack.", "Not A Data Pack");
+                beepAndShowError(this, MessageFormat.format(strings.getString("dialog.export.error.not_datapack"), dataPackFile.getName()), strings.getString("dialog.export.title.not_datapack"));
                 return;
             } else if (dataPackFile.getName().equalsIgnoreCase("worldpainter.zip")) {
-                beepAndShowError(this, "The WorldPainter data pack is managed by WorldPainter.", "Cannot Add WorldPainter Data Pack");
+                beepAndShowError(this, strings.getString("dialog.export.error.wp_datapack"), strings.getString("dialog.export.title.wp_datapack"));
                 return;
             } else {
                 for (Enumeration<File> e = dataPacksListModel.elements(); e.hasMoreElements(); ) {
                     final File existingDataPack = e.nextElement();
                     if (existingDataPack.getName().equalsIgnoreCase(dataPackFile.getName())) {
-                        if (JOptionPane.showConfirmDialog(this, "There is already a data pack selected with the mame \"" + dataPackFile.getName() + "\"\nDo you want to replaced it?", "Data Pack Name Already Present", YES_NO_OPTION) == YES_OPTION) {
+                        if (JOptionPane.showConfirmDialog(this, MessageFormat.format(strings.getString("dialog.export.confirm.datapack_overwrite"), dataPackFile.getName()), strings.getString("dialog.export.title.datapack_present"), YES_NO_OPTION) == YES_OPTION) {
                             dataPacksListModel.removeElement(existingDataPack);
                             break;
                         } else {

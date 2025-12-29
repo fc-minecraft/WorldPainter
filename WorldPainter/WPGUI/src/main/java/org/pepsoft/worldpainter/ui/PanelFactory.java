@@ -23,13 +23,20 @@ public class PanelFactory {
 
     public static JTabbedPane createPalette(App app) {
         JTabbedPane sidePanel = new JTabbedPane(JTabbedPane.LEFT);
-        sidePanel.addTab(null, Icons.load(Icons.KEY_TOOLS), app.createToolPanel(), strings.getString("dock.tools"));
-        sidePanel.addTab(null, Icons.load(Icons.KEY_SETTINGS), app.createToolSettingsPanel(), strings.getString("dock.tool.settings"));
-        sidePanel.addTab(null, Icons.load(Icons.KEY_LAYERS), app.createLayerPanel(), strings.getString("dock.layers"));
-        sidePanel.addTab(null, Icons.load(Icons.KEY_TERRAIN), app.createTerrainPanel(), strings.getString("dock.terrain"));
-        sidePanel.addTab(null, Icons.load(Icons.KEY_BIOMES), app.createBiomesPanelContainer(), strings.getString("dock.biomes"));
-        sidePanel.addTab(null, Icons.load(Icons.KEY_ANNOTATIONS), app.createAnnotationsPanel(), strings.getString("dock.annotations"));
+        sidePanel.addTab(null, Icons.load(Icons.KEY_TOOLS), wrap(app.createToolPanel()), strings.getString("dock.tools"));
+        sidePanel.addTab(null, Icons.load(Icons.KEY_SETTINGS), wrap(app.createToolSettingsPanel()), strings.getString("dock.tool.settings"));
+        sidePanel.addTab(null, Icons.load(Icons.KEY_LAYERS), wrap(app.createLayerPanel()), strings.getString("dock.layers"));
+        sidePanel.addTab(null, Icons.load(Icons.KEY_TERRAIN), wrap(app.createTerrainPanel()), strings.getString("dock.terrain"));
+        sidePanel.addTab(null, Icons.load(Icons.KEY_BIOMES), wrap(app.createBiomesPanelContainer()), strings.getString("dock.biomes"));
+        sidePanel.addTab(null, Icons.load(Icons.KEY_ANNOTATIONS), wrap(app.createAnnotationsPanel()), strings.getString("dock.annotations"));
         return sidePanel;
+    }
+
+    private static JScrollPane wrap(JComponent component) {
+        JScrollPane scrollPane = new JScrollPane(component);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        return scrollPane;
     }
 
     public static JPanel createBrushPanel(App app) {
