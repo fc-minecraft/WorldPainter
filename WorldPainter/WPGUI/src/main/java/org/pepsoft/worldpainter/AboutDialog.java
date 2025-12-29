@@ -31,12 +31,14 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.awt.image.BufferedImage;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.pepsoft.util.GUIUtils.getUIScale;
 import static org.pepsoft.util.GUIUtils.scaleToUI;
 import static org.pepsoft.util.GUIUtils.scaleWindow;
 import static org.pepsoft.util.swing.MessageUtils.showInfo;
@@ -70,7 +72,21 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
         rootPane.setDefaultButton(buttonClose);
 
         scaleToUI(this);
-        jLabel1.setIcon(new ImageIcon(scaleToUI(((ImageIcon) jLabel1.getIcon()).getImage(), true)));
+        ImageIcon originalIcon = (ImageIcon) jLabel1.getIcon();
+        if (originalIcon != null) {
+            Image originalImage = originalIcon.getImage();
+            float scale = getUIScale();
+            if (scale != 1.0f) {
+                int newWidth = (int) (originalIcon.getIconWidth() * scale);
+                int newHeight = (int) (originalIcon.getIconHeight() * scale);
+                BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = scaledImage.createGraphics();
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                g2d.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
+                g2d.dispose();
+                jLabel1.setIcon(new ImageIcon(scaledImage));
+            }
+        }
         scaleWindow(this);
         setLocationRelativeTo(parent);
         addWindowListener(this);
@@ -201,7 +217,7 @@ public class AboutDialog extends javax.swing.JDialog implements WindowListener {
         setTitle("About WorldPainter");
         setResizable(false);
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/pepsoft/worldpainter/resources/banner.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/splash.png"))); // NOI18N
         jLabel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
 
         buttonClose.setText("Close");

@@ -89,9 +89,9 @@ public class ThemeManager {
                     break;
             }
 
-            if (GUIUtils.getUIScale() != 1.0f) {
-                GUIUtils.scaleLookAndFeel(GUIUtils.getUIScale());
-            }
+            // if (GUIUtils.getUIScale() != 1.0f) {
+            //     GUIUtils.scaleLookAndFeel(GUIUtils.getUIScale());
+            // }
 
             // Enable FlatInspector with Ctrl+Shift+Alt+X
             FlatInspector.install("ctrl shift alt X");

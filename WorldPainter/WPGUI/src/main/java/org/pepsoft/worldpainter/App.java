@@ -4645,31 +4645,6 @@ public final class App extends JFrame implements BrushControl,
     }
     
     private void fixLabelSizes() {
-        //locationLabel.setMinimumSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
-        //locationLabel.setPreferredSize(new java.awt.Dimension(250, locationLabel.getPreferredSize().height));
-        locationLabel.setMinimumSize(null);
-        locationLabel.setPreferredSize(null);
-        heightLabel.setMinimumSize(heightLabel.getSize());
-        heightLabel.setPreferredSize(heightLabel.getSize());
-        heightLabel.setMaximumSize(heightLabel.getSize());
-        slopeLabel.setMinimumSize(slopeLabel.getSize());
-        slopeLabel.setPreferredSize(slopeLabel.getSize());
-        slopeLabel.setMaximumSize(slopeLabel.getSize());
-        materialLabel.setMinimumSize(materialLabel.getSize());
-        materialLabel.setPreferredSize(materialLabel.getSize());
-        materialLabel.setMaximumSize(materialLabel.getSize());
-        waterLabel.setMinimumSize(waterLabel.getSize());
-        waterLabel.setPreferredSize(waterLabel.getSize());
-        waterLabel.setMaximumSize(waterLabel.getSize());
-        biomeLabel.setMinimumSize(biomeLabel.getSize());
-        biomeLabel.setPreferredSize(biomeLabel.getSize());
-        biomeLabel.setMaximumSize(biomeLabel.getSize());
-        radiusLabel.setMinimumSize(radiusLabel.getSize());
-        radiusLabel.setPreferredSize(radiusLabel.getSize());
-        radiusLabel.setMaximumSize(radiusLabel.getSize());
-        zoomLabel.setMinimumSize(zoomLabel.getSize());
-        zoomLabel.setPreferredSize(zoomLabel.getSize());
-        zoomLabel.setMaximumSize(zoomLabel.getSize());
 
         locationLabel.setText(strings.getString("location-"));
         heightLabel.setText(" ");
